@@ -1,5 +1,5 @@
-from CBA.interaction_analysis import *
-from CBA.utils import AttributeGenerator
+from IBPY.interaction_analysis import *
+from IBPY.utils import AttributeGenerator
 import ffmpeg  # pip ffmpeg-python
 import os
 
