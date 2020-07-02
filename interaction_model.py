@@ -59,18 +59,18 @@ class Expression:
         for mod,f in linked_files.items():
             # TODO: improve the destination path choice flexibility
             if dest_path is None:
-                dest_path = os.path.join(os.path.dirname(f), mod)
-                if not os.path.exists(dest_path):
-                    os.makedirs(dest_path)
+                dest_path_ = os.path.join(os.path.dirname(f), mod)
+                if not os.path.exists(dest_path_):
+                    os.makedirs(dest_path_)
             for strt, stp, val in self.val:
                 if not to:
                     stp = stp - strt
                 strt = str(strt / 1000)  # from ms to sec
                 stp = str(stp / 1000)
-                out_name, ext = os.path.splitext(os.path.basename(dest_path))
+                out_name, ext = os.path.splitext(os.path.basename(dest_path_))
                 out_name = '_'.join([out_name, self.label, strt.replace('.', ''), stp.replace('.','')])
                 out_name += ext
-                out_name = os.path.join(dest_path, out_name)
+                out_name = os.path.join(dest_path_, out_name)
                 ffmpeg.input(f, **{"ss": strt, "t": stp}).output(out_name).run()
 
 
