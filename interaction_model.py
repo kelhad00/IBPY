@@ -63,7 +63,7 @@ class Expression:
                 if not os.path.exists(dest_path_):
                     os.makedirs(dest_path_)
             else:
-                dest_path_ =  dest_path
+                dest_path_ =  os.path.join(dest_path, mod)
             for strt, stp, val in self.val:
                 if not to:
                     stp = stp - strt
