@@ -57,13 +57,12 @@ class Expression:
             else:
                 linked_files = self.linked_files
         for mod,f in linked_files.items():
-            # TODO: improve the destination path choice flexibility
             if dest_path is None:
                 dest_path_ = os.path.join(os.path.dirname(f), mod)
-                if not os.path.exists(dest_path_):
-                    os.makedirs(dest_path_)
             else:
                 dest_path_ =  os.path.join(dest_path, mod)
+            if not os.path.exists(dest_path_):
+                os.makedirs(dest_path_)
             for strt, stp, val in self.val:
                 if not to:
                     stp = stp - strt
