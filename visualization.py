@@ -18,7 +18,7 @@ def plot_overlapping_tiers_same_colors(dct, lstA, lstB):
     for indA, B in dct.items():
         widthA = lstA[indA][1] - lstA[indA][0]
         leftA = lstA[indA][0]
-        for indB in B:
+        for indB in B:#if overlap with 2 A segments consider it overlapping second one
             widthB = lstB[indB][1] - lstB[indB][0]
             leftB = lstB[indB][0]
             ax.barh(
