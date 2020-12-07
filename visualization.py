@@ -36,7 +36,6 @@ def plot_overlapping_tiers_same_colors(dct, lstA, lstB):
     plt.xlim(
         [lstA[first][0] - 0.1 * lstA[first][0], lstA[last][1] + 0.1 * lstA[last][1]]
     )
-    plt.show()
     return
 
 
@@ -74,7 +73,6 @@ def plot_overlapping_tiers_same_colors(dct, lstA, lstB):
 #             last[1] + 0.1 * last[1]
 #         ]
 #     )
-#     plt.show()
 #     return
 
 
@@ -96,5 +94,4 @@ def plot_tiers(dct):
         y += 1
     ax.set_yticks(ticks_pos)
     ax.set_yticklabels(ticks_names)
-    plt.show()
     return
