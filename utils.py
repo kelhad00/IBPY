@@ -87,7 +87,7 @@ def split_segments(file_path, dest_path, label, lst_vals, to=False):
         out_name = '_'.join([out_name, label, val, strt.replace('.', ''), stp.replace('.','')])
         out_name += ext
         out_name = os.path.join(dest_path, out_name)
-        ffmpeg.input(f, **{"ss": strt, "t": stp}).output(out_name).run()
+        ffmpeg.input(file_path, **{"ss": strt, "t": stp}).output(out_name).run()
 
 
 def ffmpeg_convert(infile, outfile):
