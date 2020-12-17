@@ -1,4 +1,5 @@
 import os
+import ffmpeg  # pip ffmpeg-python
 
 ##check duration
 def check_duration(eaf):
@@ -65,3 +66,29 @@ class AttributeGenerator:
         """Get list of attributes added."""
         lst = [l[1:] for l in self.__dict__ if l.startswith("_")]
         return lst
+
+def split_segments(filepath, destpath, label, lst_vals):
+    """split one file into several based on lst_vals.
+
+    Args:
+        filepath (str): path to file to split.
+        destpath (str): path to directory where to save.
+        label (str): label corresponding to lst_vals.
+        lst_vals (list): (start, stop, val)
+    """
+
+    for strt, stp, val in lst_vals:
+        if not to:
+            stp = stp - strt
+        strt = str(strt / 1000)  # from ms to sec
+        stp = str(stp / 1000)
+        out_name, ext = os.path.splitext(os.path.basename(filepath))
+        #TODO: add more flexibility to naming
+        out_name = '_'.join([out_name, label, val, strt.replace('.', ''), stp.replace('.','')])
+        out_name += ext
+        out_name = os.path.join(dest_path, out_name)
+        ffmpeg.input(f, **{"ss": strt, "t": stp}).output(out_name).run()
+
+
+def ffmpeg_convert(infile, outfile):
+    ffmpeg.input(infile).output(outfile).run()

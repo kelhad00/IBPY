@@ -1,12 +1,16 @@
 from IBPY.interaction_analysis import *
-from IBPY.utils import AttributeGenerator
-import ffmpeg  # pip ffmpeg-python
+from IBPY.utils import AttributeGenerator, split_segments
 import os
 
 
 class Expression:
     def __init__(self, label, val, linked_files=None):
-        """we don't know if val is ordered or not"""
+        """
+        label (str) : expression name.
+        val (tuple): (start, stop, value) format.
+        linked_file (dict): link to data files like video or audio files.
+                            In the format {key1:path_to_file1, key2:path_to_file2}
+        We don't know if val is ordered or not"""
         self.label = label
         self.val = val
         self.linked_files = linked_files
@@ -38,7 +42,7 @@ class Expression:
         dct = {}
         for _, _, lab in self.val:
             if lab not in cnt_dct:
-                cnt_dct[lab] = 0
+                cnt_dct[lab] = 1
             else:
                 cnt_dct[lab] += 1
         return cnt_dct
@@ -47,7 +51,7 @@ class Expression:
         dct = get_overlapping_segments(self, val, lst)
         return dct
 
-    def segment(self, linked_files=None, dest_path=None, to=False):
+    def split_segments(self, linked_files=None, dest_path=None, to=False):
         """split the corresponding files into the tier's values
         linked_files must be: {key1:path_to_file1, key2:path_to_file2}"""
 
@@ -63,17 +67,7 @@ class Expression:
                 dest_path_ =  os.path.join(dest_path, mod)
             if not os.path.exists(dest_path_):
                 os.makedirs(dest_path_)
-            for strt, stp, val in self.val:
-                if not to:
-                    stp = stp - strt
-                strt = str(strt / 1000)  # from ms to sec
-                stp = str(stp / 1000)
-                out_name, ext = os.path.splitext(os.path.basename(f))
-                #TODO: add more flexibility to naming
-                out_name = '_'.join([out_name, self.label, val, strt.replace('.', ''), stp.replace('.','')])
-                out_name += ext
-                out_name = os.path.join(dest_path_, out_name)
-                ffmpeg.input(f, **{"ss": strt, "t": stp}).output(out_name).run()
+            split_segments(f, dest_path_, self.label, self.val)
 
 
 class Subject(AttributeGenerator):
@@ -99,7 +93,6 @@ class Subject(AttributeGenerator):
     def expr_lst(self):
         """Return a list of expressions added."""
         return super()._list_attr
-
 
 class Interaction:
     """Represent an interaction."""
