@@ -67,7 +67,7 @@ class AttributeGenerator:
         lst = [l[1:] for l in self.__dict__ if l.startswith("_")]
         return lst
 
-def split_segments(filepath, destpath, label, lst_vals):
+def split_segments(filepath, destpath, label, lst_vals, to=False):
     """split one file into several based on lst_vals.
 
     Args:

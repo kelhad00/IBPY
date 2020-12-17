@@ -67,7 +67,7 @@ class Expression:
                 dest_path_ =  os.path.join(dest_path, mod)
             if not os.path.exists(dest_path_):
                 os.makedirs(dest_path_)
-            split_segments(f, dest_path_, self.label, self.val)
+            split_segments(f, dest_path_, self.label, self.val, to)
 
 
 class Subject(AttributeGenerator):
