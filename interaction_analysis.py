@@ -39,25 +39,7 @@ def get_overlapping_segments_ind(lstA, lstB):
                     dct[indA] = [indB]
                 indA += 1
             indB += 1
-    return dct
-
-
-def overlapping_dct_from_indices_to_vals(dct_inds, lstA, lstB):
-    """Convert dictionary of indices to dictionary of values.
-    
-    Args:
-        dct_inds ([type]): output of get_overlapping_segments_ind output.
-        lstA ([type]): list of labels only and not [(start, stop, label), etc.]
-        lstB ([type]): list of labels only and not [(start, stop, label), etc.]
-    
-    Returns:
-        dict: {val: [vals]}
-    """
-
-    dct_vals = {}
-    for indA, B in dct_inds.items():
-        dct_vals[lstA[indA]] = [lstB[indB] for indB in B]
-    return dct_vals
+    return dcts
 
 
 def get_overlapping_segments(lstA, lstB, values_only=False):

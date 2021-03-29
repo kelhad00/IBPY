@@ -29,7 +29,7 @@ def ind_to_val(lst_ind, lst_vals):
 
 
 def keep_pairs(paths_lst, patt1, patt2):
-    """Keep only in paths_lst the pairs based on matching patt1 and patt2.
+    """keep only in paths_lst the pairs based on matching patt1 and patt2.
     """
     ref = set(paths_lst)
     pairs = []
@@ -92,3 +92,20 @@ def split_segments(file_path, dest_path, label, lst_vals, to=False):
 
 def ffmpeg_convert(infile, outfile):
     ffmpeg.input(infile).output(outfile).run()
+
+def overlapping_dct_from_indices_to_vals(dct_inds, lstA, lstB):
+    """Convert dictionary of indices to dictionary of values.
+    
+    Args:
+        dct_inds (dict): {indA:[indB]} (output of get_overlapping_segments_ind output).
+        lstA (list): labels of which the indices in dct_inds correspond to.
+        lstB (list): labels of which the indices in dct_inds correspond to.
+    
+    Returns:
+        dict: {val: [vals]}
+    """
+
+    dct_vals = {}
+    for indA, B in dct_inds.items():
+        dct_vals[lstA[indA]] = [lstB[indB] for indB in B]
+    return dct_vals
