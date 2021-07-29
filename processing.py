@@ -14,9 +14,9 @@ def tuple_to_sequence(lst, width, shift):
     last_frame = (lst[-1][1] - width) / shift
     frame_id = 0
     ind = 0
-    while (frame_id * shift) < last_frame and ind < len(lst):
+    while (frame_id * shift) < (last_frame * shift) and ind < len(lst):
         if lst[ind][1] >= (frame_id * shift) >= lst[ind][0]:
-            while (frame_id * shift) <= lst[ind][1]:
+            while (frame_id * shift) < lst[ind][1]:
                 seq.append(lst[ind][2])
                 frame_id += 1
             ind += 1
@@ -24,6 +24,6 @@ def tuple_to_sequence(lst, width, shift):
             while (frame_id * shift) < lst[ind][0]:
                 seq.append(None)
                 frame_id += 1
-                if (frame_id * shift) >= last_frame:
+                if (frame_id * shift) >= (last_frame * shift):
                     return seq
     return seq
