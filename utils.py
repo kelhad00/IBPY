@@ -109,3 +109,187 @@ def overlapping_dct_from_indices_to_vals(dct_inds, lstA, lstB):
     for indA, B in dct_inds.items():
         dct_vals[lstA[indA]] = [lstB[indB] for indB in B]
     return dct_vals
+
+
+
+class TierNavigator:
+    def __init__(self, tier, ind = 0):
+        self.tier = tier
+        self.ind = ind
+        self.len = len(tier)
+    
+    def inc(self, val = 1):
+        if not (0 <= (self.ind + val) < len(self.tier)):
+            raise ValueError("Index would become out of range.")
+        self.ind+=val
+
+    @property
+    def next_ind(self):
+        if (self.ind+1) >= len(self.tier):
+            print("WARNING:No further element in tier.")
+            return None
+        return self.ind+1
+
+    @property
+    def stt(self):
+        return self.tier[self.ind][0]
+
+    @property
+    def stp(self):
+        return self.tier[self.ind][1]
+
+    @property
+    def next_stt(self):
+        if (self.ind+1) > len(self.tier):
+            print("WARNING:Index out of range.")
+            return None
+        return self.tier[self.ind+1][0]
+
+    @property
+    def next_stp(self):
+        if (self.ind+1) > len(self.tier):
+            print("WARNING:Index out of range.")
+            return None
+        return self.tier[self.ind+1][1]
+    
+    @property
+    def prev_stt(self):
+        if (self.ind-1) <= 0:
+            print("WARNING:Index out of range.")
+            return None
+        return self.tier[self.ind-1][0]
+
+    @property
+    def prev_stt(self):
+        if (self.ind-1) <= 0:
+            print("WARNING:Index out of range.")
+            return None
+        return self.tier[self.ind-1][1]
+
+
+def slice_and_split(seg, width, max_dur, overlap_perc = 0.33):
+    """[summary]
+
+    Args:
+        seg ([type]): [description]
+        width ([type]): [description]
+        max_dur ([type]): [description]
+        overlap_perc (float, optional): windows overlap ratio. Defaults to 0.3.
+
+    Returns:
+        [type]: [description]
+    """
+    stt, stp, val = seg
+    seg_width = stp-stt
+    final = []
+    step = round(width*(1-overlap_perc))
+    for i in range(stt, stp, step):
+        if i+width>max_dur:
+            return final
+        print('start:{}, stop:{}, step:{}, val:{}'.format(stt, stp, step, val))
+        final.append((i, i+width, val))
+    return final
+
+def pad_and_split(seg, width, max_dur, overlap_perc = 0.33):
+    dur = seg[1]-seg[0]
+    final = []
+    step = round(width*(1-overlap_perc))
+    stt = seg[1]-width
+    stp = seg[0]+width
+    for t in range(stt, stp, step):
+        if (t < 0) or ((t+dur) > max_dur):# window before 0 or after total duration, skip it.
+            continue
+        if t >= seg[1]: # if window start>than segment length
+            break
+        final.append((t, t+width, seg[2]))
+    return final
+
+def adjust_segments_len(seg_lst, width, max_dur, overlap_perc=0.33):
+    """Generate segments of fix lengths.
+
+    Args:
+        seg_lst (list of tuples): [(stt,stp,lab)]
+        width (numeric): desired length in milliseconds.
+        max_dur (numeric): total duration considered for entire tier in milliseconds.
+        overlap_perc (float): percentage of window overlap.
+
+    Returns:
+        [type]: [description]
+    """
+    final_segs = []
+    for seg in seg_lst:
+        if seg[1]-seg[0]>width:
+            final_segs.extend(slice_and_split(seg, width, max_dur, overlap_perc))
+        elif seg[1]-seg[0]<width:
+            final_segs.extend(pad_and_split(seg, width, max_dur, overlap_perc))
+        else:
+            final_segs.append(seg)
+    return final_segs
+
+def intersections():
+    #same as union but modify which ones to keep.
+    pass
+
+def create_none_tier(tier, max_dur, stt_time = 0, lab = ''):
+    """return segments not present in tier.
+
+    Args:
+        tier (list of tuples): [(stt,stp,lab)]
+        max_dur (numeric): total duration considered for entire tier in milliseconds.
+        stt_time (int, optional): tier starting time considered. Defaults to 0.
+        lab (str, optional): label to add to the union segments tuples. Defaults to ''.
+
+    Returns:
+        list of tuples: [(stt,stp,lab)] tier of segments not present in input tier.
+    """
+    tier = tier[:] # avoid alteraction of input due to referencing
+    tier.insert(0, (stt_time, stt_time, lab))
+    tier.append((max_dur, max_dur, lab))
+    tier = TierNavigator(tier)
+    final = []
+    while tier.next_ind:
+        if tier.next_stt - tier.stp > 0:
+            final.append((tier.stp, tier.next_stt, lab))
+        tier.inc()
+    return final
+
+def union_tiers(tier1, tier2, lab = '', margin = 0):#margin of error 50 ms: in case of annotation error
+    """return the union of the tiers' segments.
+
+    To test :
+    test1 = [(1, 10,'v'), (12, 20, 'v'), (22, 25, 'v')]
+    test2 = [(3, 5, 'd'), (8, 13, 'c'), (17, 20, 'c'), (26, 27, 'f')]
+
+    test1 = [(1,3,'a'), (7,8,'a')]
+    test2 = [(4,5,'v')]
+
+    Args:
+        tier1 (list of tuples): [(stt,stp,lab)]
+        tier2 (list of tuples): [(stt,stp,lab)]
+        lab (str, optional): label to add to the union segments tuples. Defaults to ''.
+        margin (int, optional): margin of annotation error in ms. Defaults to 50.
+
+    Returns:
+        list of tuples: [(stt,stp,lab)] union of input tiers segments.
+    """
+    tiers = tier1[:]
+    tiers.extend(tier2)
+    tiers = sorted(tiers, key = lambda x: (x[0], x[1]))
+    tiers = TierNavigator(tiers)
+    final = []
+    while tiers.next_ind:
+        stt = tiers.stt
+        stp = tiers.stp
+        while stp >= (tiers.stt+margin):
+            if tiers.stp > (stp+margin):
+                stp = tiers.stp
+            else:
+                if tiers.next_ind:
+                    tiers.inc()
+                else:
+                    break
+        final.append((stt, stp, lab))
+    for i in range(tiers.ind, tiers.len-1):
+        stt, stp, _ = tiers.tier[i]
+        final.append((stt, stp, lab))
+    return final
