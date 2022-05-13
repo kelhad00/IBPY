@@ -160,7 +160,7 @@ class TierNavigator:
         return self.tier[self.ind-1][0]
 
     @property
-    def prev_stt(self):
+    def prev_stp(self):
         if (self.ind-1) <= 0:
             print("WARNING:Index out of range.")
             return None
