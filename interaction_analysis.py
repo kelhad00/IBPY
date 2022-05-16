@@ -1,3 +1,5 @@
+from utils import overlapping_dct_from_indices_to_vals
+
 def get_overlapping_segments_ind(lstA, lstB):
     """Get segments in A and B that overlap.
     
@@ -63,7 +65,7 @@ def get_overlapping_segments(lstA, lstB, values_only=False):
     dct = overlapping_dct_from_indices_to_vals(dct_inds, lstA_tempo, lstB_tempo)
     return dct
 
-
+``
 # high levels
 def count_mimicry(lstA, lstB, delta_t=0):
     """Count the occurences of B mimicking A by delta_t.
