@@ -331,3 +331,39 @@ def get_prev_n_exp(lst, n, max_dist, append_none=True):
     return dct
 
 
+#ADDED
+
+def get_overlapping_seg(A, B): 
+    """Get segments in A and B that overlap.
+    Same as get_overlapping_segments but here, the function makes directly intersection between the segments.
+    Args:
+        lstA (list of tuples): [(start time, stop time, lab),..].
+        lstB (list of tuples): [(start time, stop time, lab),..]
+    
+    Returns
+        list: [(startime overlap, endtime overlap, lab)]
+    """
+    indA = 0
+    indB = 0
+    lst = []
+
+    while indA < len(A) and indB < len(B):
+        # Left bound for intersecting segment
+        l = max(A[indA][0], B[indB][0])
+         
+        # Right bound for intersecting segment
+        r = min(A[indA][1], B[indB][1])
+         
+        # If segment is valid print it
+        if l <= r:
+            lst.append((l,r,B[indB][2]))
+ 
+        # If i-th interval's right bound is
+        # smaller increment i else increment j
+        if A[indA][1] < B[indB][1]:
+            indA += 1
+        else:
+            indB += 1
+
+    return lst
+
