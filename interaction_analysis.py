@@ -1,6 +1,6 @@
-from utils import overlapping_dct_from_indices_to_vals
+from .utils import overlapping_dct_from_indices_to_vals
 
-def get_overlapping_segments_ind(lstA, lstB):
+def get_overlapping_segments_ind(lstA, lstB):  
     """Get segments in A and B that overlap.
     
     Args:
@@ -15,11 +15,11 @@ def get_overlapping_segments_ind(lstA, lstB):
     indB = 0
     dct = {}
     while indA < len(lstA) and indB < len(lstB):
-        while lstA[indA][0] >= lstB[indB][1]:
+        while lstA[indA][0] >= lstB[indB][1]:       
             indB += 1
             if indB >= len(lstB):
                 return dct
-        while lstA[indA][1] <= lstB[indB][0]:
+        while lstA[indA][1] <= lstB[indB][0]:      
             indA += 1
             if indA >= len(lstA):
                 return dct
@@ -28,20 +28,64 @@ def get_overlapping_segments_ind(lstA, lstB):
         ):
             while indB < len(lstB) and lstB[indB][1] < lstA[indA][1]:
                 if indA in dct:
-                    dct[indA].append(indB)
+                    if indB in dct[indA]:           #added
+                        pass                        #added
+                    else:                           #added
+                      dct[indA].append(indB)
                 else:
                     dct[indA] = [indB]
+                dct[indA].append(indB+1)            #added
                 indB += 1
             indA += 1
-        elif (lstB[indB][0] <= lstA[indA][0]) and (lstB[indB][1] >= lstA[indA][1]):
-            while indA < len(lstA) and lstA[indA][1] < lstB[indB][1]:
+
+        elif (lstB[indB][0] <= lstA[indA][0]) and (lstB[indB][1] >= lstA[indA][1]): 
+            while indA < len(lstA) and (lstA[indA][1] < lstB[indB][1]):
                 if indA in dct:
                     dct[indA].append(indB)
                 else:
                     dct[indA] = [indB]
                 indA += 1
             indB += 1
-    return dcts
+
+    return dct
+
+
+def gos_ind(A, B): #get_overlapping_segments_ind - correct function
+    """Get segments in A and B that overlap.
+    
+    Args:
+        lstA (list of tuples): [(start time, stop time, lab),..].
+        lstB (list of tuples): [(start time, stop time, lab),..]
+    
+    Returns
+        dict: {index of segment in lstA: [indices of segments in lstB]}
+    """
+    indA = 0
+    indB = 0
+    dct = {}
+
+    while indA < len(A) and indB < len(B):
+        # Left bound for intersecting segment
+        l = max(A[indA][0], B[indB][0])
+         
+        # Right bound for intersecting segment
+        r = min(A[indA][1], B[indB][1])
+         
+        # If segment is valid, we add indices corresponding to A and B to the dictionnary
+        if l <= r:
+            if indA in dct :            #if A indice is already in the dict,
+                dct[indA].append(indB)      #we add B indice to those who are aloready ther
+            else :
+                dct[indA]=[indB]            
+ 
+        #If the endtime of the i-th interval of list A is smaller, we increment indice A.
+        #Else, we increment indice B
+        if A[indA][1] < B[indB][1]:
+            indA += 1
+        else:
+            indB += 1
+
+    return dct
 
 
 def get_overlapping_segments(lstA, lstB, values_only=False):
@@ -55,7 +99,7 @@ def get_overlapping_segments(lstA, lstB, values_only=False):
     Returns:
         dict: {Segments in A: [Segments in B]}
     """
-    dct_inds = get_overlapping_segments_ind(lstA, lstB)
+    dct_inds = gos_ind(lstA, lstB)
     if values_only:
         lstA_tempo = [val for b, e, val in lstA]
         lstB_tempo = [val for b, e, val in lstB]
@@ -65,7 +109,6 @@ def get_overlapping_segments(lstA, lstB, values_only=False):
     dct = overlapping_dct_from_indices_to_vals(dct_inds, lstA_tempo, lstB_tempo)
     return dct
 
-``
 # high levels
 def count_mimicry(lstA, lstB, delta_t=0):
     """Count the occurences of B mimicking A by delta_t.
@@ -234,9 +277,7 @@ def get_next_n_exp(lst, n, max_dist, append_none=True):
         dict: {label: [followinglabels]}
     """
     dct = {}
-    for l in range(
-        len(lst) - n
-    ):  # skip the last n elements (cannot assume they are None)
+    for l in range(len(lst) - n):  # skip the last n elements (cannot assume they are None)
         lab = lst[l][2]
         if lab not in dct:
             dct[lab] = []
@@ -288,3 +329,41 @@ def get_prev_n_exp(lst, n, max_dist, append_none=True):
         if len(temp) == n:
             dct[lab].append(temp)
     return dct
+
+
+#ADDED
+
+def get_overlapping_seg(A, B): 
+    """Get segments in A and B that overlap.
+    Same as get_overlapping_segments but here, the function makes directly intersection between the segments.
+    Args:
+        lstA (list of tuples): [(start time, stop time, lab),..].
+        lstB (list of tuples): [(start time, stop time, lab),..]
+    
+    Returns
+        list: [(startime overlap, endtime overlap, lab)]
+    """
+    indA = 0
+    indB = 0
+    lst = []
+
+    while indA < len(A) and indB < len(B):
+        # Left bound for intersecting segment
+        l = max(A[indA][0], B[indB][0])
+         
+        # Right bound for intersecting segment
+        r = min(A[indA][1], B[indB][1])
+         
+        # If segment is valid print it
+        if l <= r:
+            lst.append((l,r,B[indB][2]))
+ 
+        # If i-th interval's right bound is
+        # smaller increment i else increment j
+        if A[indA][1] < B[indB][1]:
+            indA += 1
+        else:
+            indB += 1
+
+    return lst
+

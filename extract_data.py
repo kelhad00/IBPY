@@ -2,6 +2,8 @@ import os
 import pympi
 import numpy
 
+from .processing import tuple_to_sequence
+
 
 def get_all_filepaths(root, ext, to_fill=None):
     """Return list of eaf files.
@@ -151,3 +153,105 @@ def keep_only(lst, tier_to_keep, inplace=False):
             continue
         i += 1
     return filter_lst
+
+
+#ADDED
+def tuple_access(filepath, expression, where, index):
+    """
+    This function accesses the information of a tuple
+    
+    Args : 
+        filepath (str) --> path of the file
+        expression (str) --> Smiles_0 ou Laughs_0
+        where (int) --> position of the tuple to which we want to access
+        index (int)--> index of the element to be accessed in the tuple (0, 1 ou 2)
+    Return : The wanted information
+    """
+    
+    to_dict = read_eaf_to_dict (filepath, mark=True, tiers=None)
+    m=to_dict[expression][where-1][index]
+
+    return m
+
+def find_indice_tuple(lst, value, idx):
+    """
+    Finds the index of a tuple in a list of multiple tuples
+    
+    Args :
+        lst (list) --> the list containing the tuples
+        value (int/str) --> value contained in the tuple
+        idx (int) --> position in the tuple corresponding to "value"
+    Return : 
+        int : the index of the tuple where the value at position idx is.
+    """
+    indice=0
+    for _ in lst :
+        indice +=1
+        if value == _[idx] :
+            return (indice)
+
+def get_all_filenames(root, ext, to_fill=None):
+    """Return list of eaf files name.
+    Args:
+        root (str): directory path to read from.
+        ext (str): extension of files to read.
+        to_fill ([type], optional): list to add the names to. Defaults to None.
+                                    If none, considered an empty list.
+    Returns:
+        [filename1, filname2,....]
+    """
+    if to_fill is None:
+        to_fill = []
+    if not isinstance(to_fill, list):
+        raise AttributeError("to_fill parameter must be a list")
+    paths = os.walk(root)
+    for root, _, files in paths:
+        #print(root)
+        for f in files:
+            if f.endswith(ext):
+                to_fill.append(os.path.join(f))
+    return to_fill
+ 
+def replace_intensity(lst):
+    """This function replace intensity by numbers from 1 to 3 or 4.
+
+    Args : lst (list) -> list of tuples (stt, stp, label)
+
+    Return : Return a list with all the labels replaced by numbers
+    """
+
+    if "subtle" in [i[2] for i in lst]:
+        lst=replace_label(lst, "subtle",value=1)
+        lst=replace_label(lst, "low",value=2)
+        lst=replace_label(lst, "medium",value=3)
+        lst=replace_label(lst, "high",value=4)
+    else :
+        lst=replace_label(lst, "low",value=1)
+        lst=replace_label(lst, "medium",value=2)
+        lst=replace_label(lst, "high",value=3)
+
+    return lst
+
+def tuple_to_int_sequence(lst,width, shift):
+    """This function convert tuple (stt, stp, label) into a sequence of int corresponding to the label.
+
+    Args:
+        lst (list): list of tuple (stt, stp, label)
+        width (numeric): window width in ms
+        shift (numeric): window shift in ms
+
+    Returns:
+        list: A sequence of int
+    """
+    if len(lst)==0:
+        lst_int=[]
+    else :
+        L=replace_intensity(lst)
+        #print(L)
+        lst_int=tuple_to_sequence(L,width, shift)
+        #print(lst_int)
+        for i in range(len(lst_int)) :
+            if lst_int[i] is None:
+                lst_int[i]=0
+    return lst_int
+

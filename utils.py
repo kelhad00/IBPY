@@ -1,5 +1,6 @@
 import os
-import ffmpeg  # pip ffmpeg-python
+import pandas as pd
+#import ffmpeg  # pip ffmpeg-python
 
 ##check duration
 def check_duration(eaf):
@@ -67,31 +68,32 @@ class AttributeGenerator:
         lst = [l[1:] for l in self.__dict__ if l.startswith("_")]
         return lst
 
-def split_segments(file_path, dest_path, label, lst_vals, to=False):
-    """split one file into several based on lst_vals.
+# def split_segments(file_path, dest_path, label, lst_vals, to=False):
+#     """split one file into several based on lst_vals.
 
-    Args:
-        file_path (str): path to file to split.
-        dest_path (str): path to directory where to save.
-        label (str): label corresponding to lst_vals.
-        lst_vals (list): (start, stop, val)
-    """
+#     Args:
+#         file_path (str): path to file to split.
+#         dest_path (str): path to directory where to save.
+#         label (str): label corresponding to lst_vals.
+#         lst_vals (list): (start, stop, val)
+#     """
 
-    for strt, stp, val in lst_vals:
-        if not to:
-            stp = stp - strt
-        strt = str(strt / 1000)  # from ms to sec
-        stp = str(stp / 1000)
-        out_name, ext = os.path.splitext(os.path.basename(file_path))
-        #TODO: add more flexibility to naming
-        out_name = '_'.join([out_name, label, val, strt.replace('.', ''), stp.replace('.','')])
-        out_name += ext
-        out_name = os.path.join(dest_path, out_name)
-        ffmpeg.input(file_path, **{"ss": strt, "t": stp}).output(out_name).run()
+#     for strt, stp, val in lst_vals:
+#         if not to:
+#             stp = stp - strt
+#         strt = str(strt / 1000)  # from ms to sec
+#         stp = str(stp / 1000)
+#         out_name, ext = os.path.splitext(os.path.basename(file_path))
+#         #TODO: add more flexibility to naming
+#         out_name = '_'.join([out_name, label, val, strt.replace('.', ''), stp.replace('.','')])
+#         out_name += ext
+#         out_name = os.path.join(dest_path, out_name)
+#         ffmpeg.input(file_path, **{"ss": strt, "t": stp}).output(out_name).run()
 
 
-def ffmpeg_convert(infile, outfile):
-    ffmpeg.input(infile).output(outfile).run()
+# def ffmpeg_convert(infile, outfile):
+#     ffmpeg.input(infile).output(outfile).run()
+
 
 def overlapping_dct_from_indices_to_vals(dct_inds, lstA, lstB):
     """Convert dictionary of indices to dictionary of values.
@@ -293,3 +295,159 @@ def union_tiers(tier1, tier2, lab = '', margin = 0):#margin of error 50 ms: in c
         stt, stp, _ = tiers.tier[i]
         final.append((stt, stp, lab))
     return final
+
+#ADDED
+
+def seconds_to_hhmmssms(milliseconds):
+    """Same as seconds_to_hhmmss but convert milliseconds format to HH:MM:SS:MS for vizualization"""
+    seconds, milliseconds = divmod(milliseconds, 1000)
+    minutes, seconds = divmod(seconds, 60)
+    hours, seconds = divmod(seconds, 60*60)
+
+    return (f'{int(hours):02d}:{int(minutes):02d}:{int(seconds):02d}:{int(milliseconds):03d}')
+
+def seconds_to_hmsms_list(list_of_seconds):
+    """
+    Same as seconds_to_hhmmssms() function but for a list of element
+    """
+    time=[]
+    for _ in list_of_seconds:
+        time.append(seconds_to_hhmmssms(_))
+            
+    return time
+
+def list_of_words(word, size):
+    """
+    Return a list L which contains "word". 
+    Nb : len(L)=size
+    """
+    L=[]
+    for _ in range (0,size,1):
+        L.append(word)
+    return L
+
+def keep_info(lst,n=3):
+    """
+    Keep only the n informations of our tuple.
+    Args:
+        lst (list): [(stt, sttp, label, other information), (),..., ()]
+        n (int) : Number of elements we want to keep
+
+    Returns:
+        List : A list of tuple (info1, info2,..., info_n) 
+    
+    Ex : If n=3 -> (stt, sttp, label)
+    """
+    for i in range(len(lst)) :
+        a=tuple(lst[i])
+        lst[i]=a[0:n]
+    return lst
+
+def keep_info_with_lab(lst, lab,position,if_lab_list=False):
+    """
+    Keep only our tuple with lab.
+    Args:
+        lst (list of tuple): [(stt, sttp, label), (),..., ()]
+        lab (str, int or list)
+
+    Returns:
+        List : A list of tuple with only the wanted label (lab)
+    """
+    
+    if if_lab_list is False:
+        l=[i for i in lst if i[position]==lab]
+    else:
+        l=[i for i in lst if i[position] in lab] # if lab is list
+    return l
+
+def apply_function0(func,x):
+    """
+    Args:
+        func (function): The function we want to apply
+        x (_type_): argument 1 of the function func
+
+    Returns:
+        A function applied to x 
+    """
+    return func(x)
+
+def apply_function1(func,x,y):
+    """
+    Args:
+        func (function): The function we want to apply
+        x (_type_): argument 1 of the function func
+        y (_type_): argument 2 of the function func
+
+    Returns:
+       A function applied to x and y
+    """
+    return func(x,y)
+
+def apply_funct2(func1, func2,x,special_case=False):
+    """
+    Args:
+        func1 (function): function to apply on x
+        func2 (function): function to apply on func1
+        x (_type_): argument of the function func1
+        special_case (bool, optional): If func1 is a function returning more than one element. Defaults to False.
+
+    Returns:
+        _type_: An applied function
+    """
+    """
+    Ex: If you write : apply_funct2(get_smiles_from_spk, keep_info, x)
+        It returns : keep_info(get_smiles_from_spk(root))
+    """
+
+    if special_case==True:
+        return func2(func1(x)[0])
+    else:
+        return func2(func1(x))
+
+def apply_funct2_2(func1, func2,x,y,special_case=bool):
+    """
+    Args:
+        func1 (function): function to apply on x
+        func2 (function): function to apply on func1 and y
+        x (_type_): argument of the function func1
+        y (_type_): argument of the function func2
+        special_case (bool, optional): If func1 is a function returning more than one element. Defaults to False.
+
+    Returns:
+        _type_: An applied function
+    """
+    """
+    Ex: If you write : apply_funct2(get_smiles_from_spk, keep_info, x)
+        It returns : keep_info(get_smiles_from_spk(root), y)
+    """
+    if special_case==True:
+        return func2(func1(x)[0],y)
+    else:
+        return func2(func1(x),y)
+
+
+def df_to_list(df):
+    """This function convert a dataframe to list of tuple.
+
+    Args:
+        df (dataframe): A dataframe, with columns and rows
+
+    Returns:
+        list: a list of tuple
+    """
+    lst=list(df.to_records(index=False))
+    return lst
+
+def list_to_df(lst, columns):
+    """This function convert a list to a dataframe.
+
+    Args:
+        lst (list): the list we want to convert
+        columns (list): list of the name(s) of column(s)
+    Ex: lst=[(1,2), (F,M)] and columns = ['number', 'gender'] -> return a dataframe with columns number and gender
+    Returns:
+        dataframe: A dataframe, with columns and rows
+    """
+    df = pd.DataFrame.from_records(lst, columns=columns)
+    return df     
+
