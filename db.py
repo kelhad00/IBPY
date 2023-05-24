@@ -98,7 +98,6 @@ def form_pairs_ifadv(lst):
 ## Place for the user to enter his functions form_pairs_foldername
 
 
-
 ####
 
 #ADDED
