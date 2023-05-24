@@ -95,7 +95,7 @@ def form_pairs_ifadv(lst):
     new_lst2.sort()
     return list(zip(lst1, new_lst2))
 
-## Place for the user to enter his functions form_pairs_nomDossier 
+## Place for the user to enter his functions form_pairs_foldername
 
 
 
@@ -206,12 +206,7 @@ def get_db_from_func_pair(dir, func):
             for i,j in zip (list(dct.keys()), list(dct.values())):
                 if path==i:
                     L.append((j(os.path.join(dir, path)), path))
-            # if path == "ccdb":
-            #     L.append((form_list_pairs_ccdb(os.path.join(DIR, path)), path))
-            # if path == "ifadv":
-            #     L.append((form_list_pairs_ifadv(os.path.join(DIR, path)), path))
-            # if path == "ndc":
-            #     L.append((form_list_pairs_ndc(os.path.join(DIR, path)), path))
+          
     dg=[]
     for i in range (len(L)) :
         dg+=func(L[i][0], L[i][1])[0]
@@ -237,7 +232,6 @@ def get_db_from_func_no_pair(dir, func, database_names, tier):
     for path in os.listdir(dir):
         if os.path.isdir(os.path.join(dir, path)):
             n+=1
-            # data=["ccdb","ifadv","ndc"]
             for i in database_names:
                 if path==i.lower():
                     L.append((get_all_filepaths((os.path.join(dir, path)), "eaf", None) , path))
@@ -248,4 +242,37 @@ def get_db_from_func_no_pair(dir, func, database_names, tier):
 
     
     dg=list_to_df(dg, func(L[0][0], L[0][1], tier)[1])
+    return dg
+
+def get_db_from_func_no_pair_tier(dir, func, database_names, tier1, tier2, entity):
+    """This function takes a path as an argument and creates a database 
+        based on the number of items in the folder using a chosen function.
+    It doesn't take into account pairs in our databases.
+
+    Args:
+        dir (str) : path of the folder containing all databases.
+        func (function): Function we want to use.
+        database_names (list): List of database names.
+        tier1 (str): Tier name.
+        tier2 (str): Tier name.
+        entity (str): Entity name.
+
+    Returns:
+        dataframe: A dataframe corresponding to the function chosen
+    """
+    n=0
+    L=[]
+    for path in os.listdir(dir):
+        if os.path.isdir(os.path.join(dir, path)):
+            n+=1
+            for i in database_names:
+                if path==i.lower():
+                    L.append((get_all_filepaths((os.path.join(dir, path)), "eaf", None) , path))
+
+    dg=[]
+    for i in range (len(L)) :
+        dg+=func(L[i][0], L[i][1], tier1, tier2, entity)[0]
+
+    
+    dg=list_to_df(dg, func(L[0][0], L[0][1], tier1, tier2, entity)[1])
     return dg
