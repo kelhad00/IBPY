@@ -219,7 +219,7 @@ def get_db_from_func_pair(dir, func):
     dg=list_to_df(dg, func(L[0][0], L[0][1])[1])
     return dg
 
-def get_db_from_func_no_pair(dir, func):
+def get_db_from_func_no_pair(dir, func, database_names, tier):
     """This function takes a path as an argument and creates a database 
         based on the number of items in the folder using a chosen function.
     It doesn't take into account pairs in our databases.
@@ -227,7 +227,8 @@ def get_db_from_func_no_pair(dir, func):
     Args:
         dir (str) : path of the folder containing all databases.
         func (function): Function we want to use.
-
+        database_names (list): List of database names.
+        tier (str): Tier name.
     Returns:
         dataframe: A dataframe corresponding to the function chosen
     """
@@ -236,16 +237,15 @@ def get_db_from_func_no_pair(dir, func):
     for path in os.listdir(dir):
         if os.path.isdir(os.path.join(dir, path)):
             n+=1
-            data=["ccdb","ifadv","ndc"]
-            for i in data:
-                if path==i:
+            # data=["ccdb","ifadv","ndc"]
+            for i in database_names:
+                if path==i.lower():
                     L.append((get_all_filepaths((os.path.join(dir, path)), "eaf", None) , path))
 
     dg=[]
     for i in range (len(L)) :
-        dg+=func(L[i][0], L[i][1])[0]
+        dg+=func(L[i][0], L[i][1], tier)[0]
 
     
-    dg=list_to_df(dg, func(L[0][0], L[0][1])[1])
+    dg=list_to_df(dg, func(L[0][0], L[0][1], tier)[1])
     return dg
-
