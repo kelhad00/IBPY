@@ -184,7 +184,12 @@ def form_list_pairs_ndc(ROOT3):
         pair_ndc.append(ROOT3+f"\{_}")
     return pair_ndc
 
-def get_db_from_func_pair(dir, func):
+## Place for the user to enter his functions form_list_pairs_foldername
+
+
+####
+
+def get_db_from_func_pair(dir, func, database, expression_choice, tier_lists):
     """This function takes a path as an argument and creates a database 
         based on the number of items in the folder using a chosen function.
     It takes into account pairs in our databases.
@@ -192,13 +197,16 @@ def get_db_from_func_pair(dir, func):
     Args:
         dir (str) : path of the folder containing all databases.
         func (function): Function we want to use.
+        database (str): Database we want to use.
+        expression_choice (str): Expression we want to use.
+        tier_lists (list): List of tiers we want to use.
 
     Returns:
         dataframe: A dataframe corresponding to the function chosen
     """
     n=0
     L=[]
-    dct={"ccdb":form_list_pairs_ccdb, "ifadv":form_list_pairs_ifadv, "ndc":form_list_pairs_ndc}
+    dct = {db.lower(): globals()[f"form_list_pairs_{db.lower()}"] for db in database}
     for path in os.listdir(dir):
         if os.path.isdir(os.path.join(dir, path)):
             n+=1
@@ -208,9 +216,9 @@ def get_db_from_func_pair(dir, func):
           
     dg=[]
     for i in range (len(L)) :
-        dg+=func(L[i][0], L[i][1])[0]
+        dg+=func(L[i][0], L[i][1], expression_choice, tier_lists)[0]
 
-    dg=list_to_df(dg, func(L[0][0], L[0][1])[1])
+    dg=list_to_df(dg, func(L[0][0], L[0][1], expression_choice, tier_lists)[1])
     return dg
 
 def get_db_from_func_no_pair(dir, func, database_names, tier):
