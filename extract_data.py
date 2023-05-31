@@ -4,7 +4,7 @@ import numpy
 from os import listdir
 from os.path import join
 from .processing import tuple_to_sequence
-
+import pympi.Elan as elan
 
 def get_all_filepaths(root, ext, to_fill=None):
     """Return list of eaf files.
@@ -110,6 +110,92 @@ def replace_label(lst, to_replace, value=None, inplace=False, append=None):
             newlst[l] = newlst[l][0], newlst[l][1], value
     return newlst
 
+def get_time_eaf(folder, tiers=None):
+    
+    lst_time = []
+
+    for file in folder:
+        eaf = elan.Eaf(file)
+
+        max_end_time = 0
+        for tier in eaf.get_tier_names():
+            annotations = eaf.get_annotation_data_for_tier(tier)
+            for annotation in annotations:
+                end_time = annotation[1]
+                if end_time > max_end_time:
+                    max_end_time = end_time
+
+        lst_time.append(max_end_time/1000)
+
+    return lst_time
+
+def get_tier_count(folder, tier_name):
+
+    lst_file = []
+    lst = []
+    for file in folder :
+
+        lst_count = []
+        for tier in tier_name :
+
+            eaf = elan.Eaf(file)
+            annotations = eaf.get_annotation_data_for_tier(tier)
+            lst_count.append(len(annotations))
+
+        lst.append(lst_count)
+
+    return lst
+
+def get_max_min_time_tier(folder, tier) :
+
+    lst_max = []
+    lst_min = []
+
+    for file in folder :
+
+        eaf = elan.Eaf(file)
+        annotations = eaf.get_annotation_data_for_tier(tier)
+        
+        min_duration = float("inf")
+        max_duration = 0.0
+        
+        for annotation in annotations:
+            start_time = annotation[0]
+            end_time = annotation[1]
+            duration = end_time - start_time
+            
+            if duration < min_duration:
+                min_duration = duration
+            
+            if duration > max_duration:
+                max_duration = duration
+        
+        lst_min.append(min_duration/1000)
+        lst_max.append(max_duration/1000)
+
+    return lst_min, lst_max
+
+
+def get_tier_intensities(folder, tier, intensities) :
+
+    lst = []
+
+    for file in folder :
+
+        eaf = elan.Eaf(file)
+        annotations = eaf.get_annotation_data_for_tier(tier)
+        
+        intensity_count = dict.fromkeys(intensities, 0)
+
+        for annotation in annotations:
+            intensity = annotation[2]  # Assurez-vous que la colonne de l'intensité est correcte
+            
+            if intensity in intensity_count:
+                intensity_count[intensity] += 1
+    
+        lst.append(intensity_count)
+        
+    return lst
 
 def remove_label(lst, to_remove):
     """Return list not containing the labels in to_remove.
