@@ -75,20 +75,24 @@ def read_eaf_to_dict(filepath, mark=True, tiers=None):
 def get_tier_from_file(filepath, tier, values=None):
     """Return a dict of {tier:[(strt, stp, val),...]} if val in values"""
 
-    eaf = pympi.Elan.Eaf(filepath)
+    dct = read_eaf_to_dict(filepath)
     if values is not None:  # if none keep all
         if not isinstance(values, (list, tuple, numpy.ndarray, str)):
-            raise AttributeError("Values must be a list like or a string")
+            raise AttributeError("Values must be a list-like object or a string")
         if isinstance(values, str):
             values = [values]
-    dct = {tier:[]}
-    data = eaf.get_annotation_data_for_tier(tier)
+    
+    if tier not in dct:
+        return {tier: []}
+    
+    filtered_data = []
     if values is None:
-        values = set([lab for _, _, lab in data])
-    for annot in data:
+        values = set([lab for _, _, lab in dct[tier]])
+    for annot in dct[tier]:
         if annot[2] in values:
-            dct[tier].append(annot)
-    return dct
+            filtered_data.append(annot)
+
+    return {tier: filtered_data}
 
 
 def replace_label(lst, to_replace, value=None, inplace=False, append=None):
@@ -111,36 +115,38 @@ def replace_label(lst, to_replace, value=None, inplace=False, append=None):
     return newlst
 
 def get_time_eaf(folder, tiers=None):
-    
     lst_time = []
 
     for file in folder:
-        eaf = elan.Eaf(file)
-
+        dct = read_eaf_to_dict(file, tiers=tiers)
         max_end_time = 0
-        for tier in eaf.get_tier_names():
-            annotations = eaf.get_annotation_data_for_tier(tier)
+
+        for tier in dct:
+            annotations = dct[tier]
             for annotation in annotations:
                 end_time = annotation[1]
                 if end_time > max_end_time:
                     max_end_time = end_time
 
-        lst_time.append(max_end_time/1000)
+        lst_time.append(max_end_time / 1000)
 
     return lst_time
 
-def get_tier_count(folder, tier_name):
 
+def get_tier_count(folder, tier_name):
     lst_file = []
     lst = []
-    for file in folder :
 
+    for file in folder:
+        dct = read_eaf_to_dict(file)
         lst_count = []
-        for tier in tier_name :
 
-            eaf = elan.Eaf(file)
-            annotations = eaf.get_annotation_data_for_tier(tier)
-            lst_count.append(len(annotations))
+        for tier in tier_name:
+            if tier in dct:
+                annotations = dct[tier]
+                lst_count.append(len(annotations))
+            else:
+                lst_count.append(0)
 
         lst.append(lst_count)
 
@@ -152,10 +158,13 @@ def get_max_min_time_tier(folder, tier) :
     lst_min = []
 
     for file in folder :
-
-        eaf = elan.Eaf(file)
-        annotations = eaf.get_annotation_data_for_tier(tier)
+        dct = read_eaf_to_dict(file)
+        if tier not in dct:
+            lst_min.append(0.0)
+            lst_max.append(0.0)
+            continue
         
+        annotations = dct[tier]
         min_duration = float("inf")
         max_duration = 0.0
         
@@ -177,18 +186,29 @@ def get_max_min_time_tier(folder, tier) :
 
 
 def get_tier_intensities(folder, tier, intensities) :
+    """Return a list of dict of {intensity: count} for each file in folder.""
 
+    Args:
+        folder (list): list of file paths.
+        tier (string): tier name.
+        intensities (list): list of intensities to count.
+
+    Returns:
+        list: list of dict of {intensity: count} for each file in folder.
+    """
     lst = []
 
-    for file in folder :
-
-        eaf = elan.Eaf(file)
-        annotations = eaf.get_annotation_data_for_tier(tier)
+    for file in folder:
+        dct = read_eaf_to_dict(file)
+        if tier not in dct:
+            lst.append(dict.fromkeys(intensities, 0))
+            continue
         
+        annotations = dct[tier]
         intensity_count = dict.fromkeys(intensities, 0)
 
         for annotation in annotations:
-            intensity = annotation[2]  # Assurez-vous que la colonne de l'intensité est correcte
+            intensity = annotation[2].strip()
             
             if intensity in intensity_count:
                 intensity_count[intensity] += 1
@@ -221,6 +241,14 @@ def keep_only(lst, tier_to_keep, inplace=False):
     """Keep filepaths for files with annotation data in the tier tier_to_keep.
 
     Note: keep it whether file is entirely annotated or not.
+
+    Args:
+        lst (list): list of filepaths.
+        tier_to_keep (list): list of tiers to keep.
+        inplace (bool): if True, lst is modified in place.
+
+    Returns:
+        list: list of filepaths.
     """
 
     if inplace:
@@ -231,10 +259,8 @@ def keep_only(lst, tier_to_keep, inplace=False):
     limit = len(filter_lst)
     while i < limit:
         eaf = pympi.Elan.Eaf(filter_lst[i])
-        each_tier_content = [
-            len(eaf.get_annotation_data_for_tier(tier)) == 0 for tier in tier_to_keep
-        ]
-        if any(each_tier_content):
+        dct = read_eaf_to_dict(filter_lst[i])
+        if tier_to_keep not in dct:
             filter_lst.pop(i)
             limit -= 1
             continue
