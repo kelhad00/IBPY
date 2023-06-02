@@ -326,24 +326,21 @@ def get_all_filenames(root, ext, to_fill=None):
     return to_fill
  
 def replace_intensity(lst):
-    """This function replace intensity by numbers from 1 to 3 or 4.
+    """This function replace intensity by numbers.
 
     Args : lst (list) -> list of tuples (stt, stp, label)
 
     Return : Return a list with all the labels replaced by numbers
     """
 
-    if "subtle" in [i[2] for i in lst]:
-        lst=replace_label(lst, "subtle",value=1)
-        lst=replace_label(lst, "low",value=2)
-        lst=replace_label(lst, "medium",value=3)
-        lst=replace_label(lst, "high",value=4)
-    else :
-        lst=replace_label(lst, "low",value=1)
-        lst=replace_label(lst, "medium",value=2)
-        lst=replace_label(lst, "high",value=3)
+    labels = set(i[2] for i in lst)
+    # num_labels = len(labels)
 
-    return lst
+    label_mapping = {}
+    for index, label in enumerate(labels):
+        label_mapping[label] = index + 1
+
+    return [(stt, stp, label_mapping[label]) for stt, stp, label in lst]
 
 def tuple_to_int_sequence(lst,width, shift):
     """This function convert tuple (stt, stp, label) into a sequence of int corresponding to the label.
