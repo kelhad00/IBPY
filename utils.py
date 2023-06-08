@@ -4,6 +4,7 @@ import pandas as pd
 
 ##check duration
 def check_duration(eaf):
+    """Check the duration of the eaf file."""
     max_dur = 0
     names = eaf.get_tier_names()
     for n in names:
@@ -16,7 +17,7 @@ def check_duration(eaf):
 
 
 def seconds_to_hhmmss(seconds):
-    """convert seconds format to HH:MM:SS for vizualization"""
+    """Convert seconds format to HH:MM:SS for vizualization."""
     hours = seconds // (60 * 60)
     seconds %= 60 * 60
     minutes = seconds // 60
@@ -25,13 +26,12 @@ def seconds_to_hhmmss(seconds):
 
 
 def ind_to_val(lst_ind, lst_vals):
-    """transform the list of indices to list of corresponding values"""
+    """Transform the list of indices to list of corresponding values."""
     return [lst_vals[i] for i in lst_ind]
 
 
 def keep_pairs(paths_lst, patt1, patt2):
-    """keep only in paths_lst the pairs based on matching patt1 and patt2.
-    """
+    """Keep only in paths_lst the pairs based on matching patt1 and patt2."""
     ref = set(paths_lst)
     pairs = []
     for l in paths_lst:
@@ -43,8 +43,7 @@ def keep_pairs(paths_lst, patt1, patt2):
 
 
 class AttributeGenerator:
-    """create attributes from strings.
-    """
+    """Create attributes from strings."""
     def _add(self, name, val):
         setattr(self, "_" + name, val)
         setattr(
@@ -173,13 +172,13 @@ def slice_and_split(seg, width, max_dur, overlap_perc = 0.33):
     """[summary]
 
     Args:
-        seg ([type]): [description]
-        width ([type]): [description]
-        max_dur ([type]): [description]
+        seg ([type]): [description].
+        width ([type]): [description].
+        max_dur ([type]): [description].
         overlap_perc (float, optional): windows overlap ratio. Defaults to 0.3.
 
     Returns:
-        [type]: [description]
+        [type]: [description].
     """
     stt, stp, val = seg
     seg_width = stp-stt
@@ -210,13 +209,13 @@ def adjust_segments_len(seg_lst, width, max_dur, overlap_perc=0.33):
     """Generate segments of fix lengths.
 
     Args:
-        seg_lst (list of tuples): [(stt,stp,lab)]
+        seg_lst (list of tuples): [(stt,stp,lab)].
         width (numeric): desired length in milliseconds.
         max_dur (numeric): total duration considered for entire tier in milliseconds.
         overlap_perc (float): percentage of window overlap.
 
     Returns:
-        [type]: [description]
+        [type]: [description].
     """
     final_segs = []
     for seg in seg_lst:
@@ -299,7 +298,7 @@ def union_tiers(tier1, tier2, lab = '', margin = 0):#margin of error 50 ms: in c
 #ADDED
 
 def seconds_to_hhmmssms(milliseconds):
-    """Same as seconds_to_hhmmss but convert milliseconds format to HH:MM:SS:MS for vizualization"""
+    """Same as seconds_to_hhmmss but convert milliseconds format to HH:MM:SS:MS for vizualization."""
     seconds, milliseconds = divmod(milliseconds, 1000)
     minutes, seconds = divmod(seconds, 60)
     hours, seconds = divmod(seconds, 60*60)
@@ -307,146 +306,141 @@ def seconds_to_hhmmssms(milliseconds):
     return (f'{int(hours):02d}:{int(minutes):02d}:{int(seconds):02d}:{int(milliseconds):03d}')
 
 def seconds_to_hmsms_list(list_of_seconds):
-    """
-    Same as seconds_to_hhmmssms() function but for a list of element
-    """
-    time=[]
+    """Same as seconds_to_hhmmssms() function but for a list of element."""
+    time = []
     for _ in list_of_seconds:
         time.append(seconds_to_hhmmssms(_))
             
     return time
 
 def list_of_words(word, size):
+    """Return a list L which contains "word". 
+    Nb : len(L) = size.
+
+    Args:
+        word (str): A word.
+        size (int): The size of the list.
+    Returns:
+        list : A list of "word".
     """
-    Return a list L which contains "word". 
-    Nb : len(L)=size
-    """
-    L=[]
-    for _ in range (0,size,1):
+    L = []
+    for _ in range (0, size, 1):
         L.append(word)
     return L
 
-def keep_info(lst,n=3):
-    """
-    Keep only the n informations of our tuple.
-    Args:
-        lst (list): [(stt, sttp, label, other information), (),..., ()]
-        n (int) : Number of elements we want to keep
-
-    Returns:
-        List : A list of tuple (info1, info2,..., info_n) 
+def keep_info(lst, n = 3):
+    """Keep only the n informations of our tuple.
     
-    Ex : If n=3 -> (stt, sttp, label)
+    Args:
+        lst (list): [(stt, sttp, label, other information), (),..., ()].
+        n (int) : Number of elements we want to keep.
+    Returns:
+        List : A list of tuple (info1, info2,..., info_n).
+    Ex : If n=3 -> (stt, sttp, label).
     """
-    for i in range(len(lst)) :
-        a=tuple(lst[i])
-        lst[i]=a[0:n]
+    for i in range(len(lst)):
+        a = tuple(lst[i])
+        lst[i] = a[0:n]
     return lst
 
-def keep_info_with_lab(lst, lab,position,if_lab_list=False):
-    """
-    Keep only our tuple with lab.
+def keep_info_with_lab(lst, lab, position, if_lab_list = False):
+    """Keep only our tuple with lab.
+    
     Args:
-        lst (list of tuple): [(stt, sttp, label), (),..., ()]
-        lab (str, int or list)
+        lst (list of tuple): [(stt, sttp, label), (),..., ()].
+        lab (str, int or list).
 
     Returns:
-        List : A list of tuple with only the wanted label (lab)
+        List : A list of tuple with only the wanted label (lab).
     """
-    
     if if_lab_list is False:
-        l=[i for i in lst if i[position]==lab]
+        l = [i for i in lst if i[position] == lab]
     else:
-        l=[i for i in lst if i[position] in lab] # if lab is list
+        l = [i for i in lst if i[position] in lab] # if lab is list
     return l
 
-def apply_function0(func,x):
+def apply_function0(func, x):
     """
     Args:
-        func (function): The function we want to apply
-        x (_type_): argument 1 of the function func
-
+        func (function): The function we want to apply.
+        x (_type_): argument 1 of the function func.
     Returns:
-        A function applied to x 
+        A function applied to x.
     """
     return func(x)
 
-def apply_function1(func,x,y):
+def apply_function1(func, x, y):
     """
     Args:
-        func (function): The function we want to apply
-        x (_type_): argument 1 of the function func
-        y (_type_): argument 2 of the function func
-
+        func (function): The function we want to apply.
+        x (_type_): argument 1 of the function func.
+        y (_type_): argument 2 of the function func.
     Returns:
-       A function applied to x and y
+       A function applied to x and y.
     """
-    return func(x,y)
+    return func(x, y)
 
-def apply_funct2(func1, func2,x,special_case=False):
+def apply_funct2(func1, func2, x, special_case=False):
     """
     Args:
-        func1 (function): function to apply on x
-        func2 (function): function to apply on func1
-        x (_type_): argument of the function func1
+        func1 (function): function to apply on x.
+        func2 (function): function to apply on func1.
+        x (_type_): argument of the function func1.
         special_case (bool, optional): If func1 is a function returning more than one element. Defaults to False.
-
     Returns:
-        _type_: An applied function
+        _type_: An applied function.
     """
     """
-    Ex: If you write : apply_funct2(get_smiles_from_spk, keep_info, x)
-        It returns : keep_info(get_smiles_from_spk(root))
+    Ex: If you write : apply_funct2(get_smiles_from_spk, keep_info, x).
+        It returns : keep_info(get_smiles_from_spk(root)).
     """
 
-    if special_case==True:
+    if special_case == True :
         return func2(func1(x)[0])
     else:
         return func2(func1(x))
 
-def apply_funct2_2(func1, func2,x,y,special_case=bool):
+def apply_funct2_2(func1, func2, x, y, special_case=bool):
     """
     Args:
-        func1 (function): function to apply on x
-        func2 (function): function to apply on func1 and y
-        x (_type_): argument of the function func1
-        y (_type_): argument of the function func2
+        func1 (function): function to apply on x.
+        func2 (function): function to apply on func1 and y.
+        x (_type_): argument of the function func1.
+        y (_type_): argument of the function func2.
         special_case (bool, optional): If func1 is a function returning more than one element. Defaults to False.
-
     Returns:
-        _type_: An applied function
+        _type_: An applied function.
     """
     """
-    Ex: If you write : apply_funct2(get_smiles_from_spk, keep_info, x)
-        It returns : keep_info(get_smiles_from_spk(root), y)
+    Ex: If you write : apply_funct2(get_smiles_from_spk, keep_info, x).
+        It returns : keep_info(get_smiles_from_spk(root), y).
     """
-    if special_case==True:
-        return func2(func1(x)[0],y)
+    if special_case == True:
+        return func2(func1(x)[0], y)
     else:
-        return func2(func1(x),y)
+        return func2(func1(x), y)
 
 
 def df_to_list(df):
     """This function convert a dataframe to list of tuple.
 
     Args:
-        df (dataframe): A dataframe, with columns and rows
-
+        df (dataframe): A dataframe, with columns and rows.
     Returns:
-        list: a list of tuple
+        list: a list of tuple.
     """
-    lst=list(df.to_records(index=False))
+    lst = list(df.to_records(index=False))
     return lst
 
 def list_to_df(lst, columns):
     """This function convert a list to a dataframe.
 
     Args:
-        lst (list): the list we want to convert
-        columns (list): list of the name(s) of column(s)
-    Ex: lst=[(1,2), (F,M)] and columns = ['number', 'gender'] -> return a dataframe with columns number and gender
+        lst (list): the list we want to convert.
+        columns (list): list of the name(s) of column(s).
+    Ex: lst=[(1,2), (F,M)] and columns = ['number', 'gender'] -> return a dataframe with columns number and gender.
     Returns:
-        dataframe: A dataframe, with columns and rows
+        dataframe: A dataframe, with columns and rows.
     """
     df = pd.DataFrame.from_records(lst, columns=columns)
     return df     

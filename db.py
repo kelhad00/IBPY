@@ -2,20 +2,18 @@ import os
 import re
 
 from .utils import list_to_df
-
 from .extract_data import get_all_filenames, get_all_filepaths
 
 # specific db interfaces
 
 ## ndc
 def form_pairs_ndc(lst):
-    """Return filename pairs [(),(),...].
+    """Return filename pairs [(), (), ...].
 
     Args:
         lst (list): list of filenames without the path.
-
     Returns:
-        list: [(),(),...]
+        list: [(), (), ...].
     """
     lst_sorted = sorted(lst)
     i = 0
@@ -25,25 +23,23 @@ def form_pairs_ndc(lst):
         nxt = '_'.join(lst_sorted[i+1].split('_')[:2])
         if curr == nxt:
             final.append((lst_sorted[i], lst_sorted[i+1]))
-            i+=2
+            i += 2
         else:
             # print("File {} has no pair.".format(lst_sorted[i]))
-            i+=1
+            i += 1
     return final
 
 ## ccdb
 def form_pairs_ccdb(lst):
-    """Return filename pairs [(),(),...].
+    """Return filename pairs [(), (), ...].
 
     Args:
         lst (list): list of filenames without the path.
-
     Returns:
-        list: [(),(),...]
+        list: [(),(),...].
     """
-
     final = []
-    replace_with = {'dizzy':'monk', 'monk':'dizzy'}
+    replace_with = {'dizzy': 'monk', 'monk': 'dizzy'}
     i = 0
     while i < len(lst):
         key = lst[i].split('_')[-1].split('.')[0]
@@ -54,7 +50,7 @@ def form_pairs_ccdb(lst):
             lst.remove(pair)
         else:
             # print("File {} has no pair".format(l))
-            i=+1
+            i =+ 1
     for l in lst:
         # print("File {} has no pair".format(l))
         continue
@@ -62,15 +58,12 @@ def form_pairs_ccdb(lst):
 
 ## ifadv
 def form_pairs_ifadv(lst):
-    """Return list of filename pairs
-
-    Note: Assuming all elements in lst have pairs.
+    """Return list of filename pairs.
 
     Args:
         lst (list): list of filenames.
-
     Returns:
-        list: [(),(),...]
+        list: [(), (), ...].
     """
     lst1 = [] 
     lst2 = [] 
@@ -87,7 +80,7 @@ def form_pairs_ifadv(lst):
         pair_exists = any(name.startswith(pair_name[:4]) for name in lst2)
         if not pair_exists:
             lst1[i] = None
-        else :
+        else:
             index = [j for j, name in enumerate(lst2) if name.startswith(pair_name[:4])][0]
             new_lst2.append(lst2[index])
     lst1 = [name for name in lst1 if name is not None]
@@ -101,27 +94,24 @@ def form_pairs_ifadv(lst):
 ####
 
 #ADDED
-def form_pairs(ROOT1,ROOT2,ROOT3):
-    """
-    Gives filespath of pairs for each database
+def form_pairs(ROOT1, ROOT2, ROOT3):
+    """Gives filespath of pairs for each dataset.
 
     Args:
         ROOT1 (str): path of ccdb directory.
         ROOT2 (str): path of ifadv directory.
-        ROOT3 (str): path of ndc directory.        
-        
+        ROOT3 (str): path of ndc directory.         
     Returns:
-        list: [pair1_A, pair1_B, pair2_A, pair2_B,....]
-
+        list: [pair1_A, pair1_B, pair2_A, pair2_B,....].
     """
-    c=form_pairs_ccdb(get_all_filenames(ROOT1,"eaf"))
-    i=form_pairs_ifadv(get_all_filenames(ROOT2,"eaf"))
-    n=form_pairs_ndc(get_all_filenames(ROOT3, "eaf"))
+    c = form_pairs_ccdb(get_all_filenames(ROOT1, "eaf"))
+    i = form_pairs_ifadv(get_all_filenames(ROOT2, "eaf"))
+    n = form_pairs_ndc(get_all_filenames(ROOT3, "eaf"))
     liste_ccdb = list(sum(c, ())) 
     liste_ifadv = list(sum(i, ())) 
     liste_ndc = list(sum(n, ())) 
     
-    pair_ccdb, pair_ifadv, pair_ndc=([] for _ in range(3))
+    pair_ccdb, pair_ifadv, pair_ndc = ([] for _ in range(3))
     for _ in liste_ccdb:
         pair_ccdb.append(ROOT1+f"\{_}")
     for _ in liste_ifadv:
@@ -132,54 +122,46 @@ def form_pairs(ROOT1,ROOT2,ROOT3):
     return (pair_ccdb, pair_ifadv, pair_ndc)
 
 def form_list_pairs_ccdb(ROOT1):
-    """
-    Gives filespath of pairs for ccdb database
+    """Gives filespath of pairs for ccdb dataset.
     
     Args:
         ROOT1 (str): path of ccdb directory.
-
     Returns:
-        list: [pair1_A, pair1_B, pair2_A, pair2_B,....]
-
+        list: [pair1_A, pair1_B, pair2_A, pair2_B,....].
     """
-    c=form_pairs_ccdb(get_all_filenames(ROOT1,"eaf"))
+    c = form_pairs_ccdb(get_all_filenames(ROOT1, "eaf"))
     liste_ccdb = list(sum(c, ())) 
-    pair_ccdb=[]
+    pair_ccdb = []
     for _ in liste_ccdb:
         pair_ccdb.append(ROOT1+f"\{_}")
     return pair_ccdb
 
 def form_list_pairs_ifadv(ROOT2):
-    """
-    Gives filespath of pairs for ifadv database
+    """Gives filespath of pairs for ifadv dataset.
 
     Args:
         ROOT1 (str): path of ifadv directory.
-
     Returns:
-        list: [pair1_A, pair1_B, pair2_A, pair2_B,....]
-
+        list: [pair1_A, pair1_B, pair2_A, pair2_B,....].
     """
-    i=form_pairs_ifadv(get_all_filenames(ROOT2,"eaf"))
+    i = form_pairs_ifadv(get_all_filenames(ROOT2, "eaf"))
     liste_ifadv = list(sum(i, ())) 
-    pair_ifadv=[]
+    pair_ifadv = []
     for _ in liste_ifadv:
         pair_ifadv.append(ROOT2+f"\{_}")
     return pair_ifadv
 
 def form_list_pairs_ndc(ROOT3):
-    """
-    Gives filespath of pairs for ndc database
+    """Gives filespath of pairs for ndc dataset.
     
     Args:
         ROOT1 (str): path of ndc directory.
-
     Returns:
         list: [pair1_A, pair1_B, pair2_A, pair2_B,....]
     """
-    n=form_pairs_ndc(get_all_filenames(ROOT3, "eaf"))
+    n = form_pairs_ndc(get_all_filenames(ROOT3, "eaf"))
     liste_ndc = list(sum(n, ())) 
-    pair_ndc=[]
+    pair_ndc = []
     for _ in liste_ndc:
         pair_ndc.append(ROOT3+f"\{_}")
     return pair_ndc
@@ -190,128 +172,127 @@ def form_list_pairs_ndc(ROOT3):
 ####
 
 def get_db_from_func_pair(dir, func, database, expression_choice, tier_lists):
-    """This function takes a path as an argument and creates a database 
+    """This function takes a path as an argument and creates a dataset 
         based on the number of items in the folder using a chosen function.
-    It takes into account pairs in our databases.
+    It takes into account pairs in our datasets.
 
     Args:
-        dir (str) : path of the folder containing all databases.
+        dir (str) : Path of the folder containing all datasets.
         func (function): Function we want to use.
-        database (str): Database we want to use.
+        database (str): Dataset we want to use.
         expression_choice (str): Expression we want to use.
         tier_lists (list): List of tiers we want to use.
-
     Returns:
-        dataframe: A dataframe corresponding to the function chosen
+        dataframe: A dataframe corresponding to the function chosen.
     """
-    n=0
-    L=[]
+    n = 0
+    L = []
     dct = {db.lower(): globals()[f"form_list_pairs_{db.lower()}"] for db in database}
     for path in os.listdir(dir):
         if os.path.isdir(os.path.join(dir, path)):
-            n+=1
-            for i,j in zip (list(dct.keys()), list(dct.values())):
-                if path==i:
+            n += 1
+            for i, j in zip(list(dct.keys()), list(dct.values())):
+                if path == i:
                     L.append((j(os.path.join(dir, path)), path))
           
-    dg=[]
-    for i in range (len(L)) :
-        dg+=func(L[i][0], L[i][1], expression_choice, tier_lists)[0]
+    dg = []
+    for i in range (len(L)):
+        dg += func(L[i][0], L[i][1], expression_choice, tier_lists)[0]
 
-    dg=list_to_df(dg, func(L[0][0], L[0][1], expression_choice, tier_lists)[1])
+    dg = list_to_df(dg, func(L[0][0], L[0][1], expression_choice, tier_lists)[1])
     return dg
 
 def get_db_from_func_pair_tier(dir, func, database, tier1, tier2, entity1, entity2):
-    """This function takes a path as an argument and creates a database 
+    """This function takes a path as an argument and creates a dataset 
         based on the number of items in the folder using a chosen function.
-    It takes into account pairs in our databases.
+    It takes into account pairs in our datasets.
 
     Args:
-        dir (str) : path of the folder containing all databases.
+        dir (str) : Path of the folder containing all datasets.
         func (function): Function we want to use.
-        database (str): Database we want to use.
-        expression_choice (str): Expression we want to use.
-        tier_lists (list): List of tiers we want to use.
-
+        database (str): Dataset we want to use.
+        tier1 (str): First tier we want to use.
+        tier2 (str): Second tier we want to use.
+        entity1 (str): Entity of tier1 we want to use.
+        entity2 (str): Entity of tier2 we want to use.
     Returns:
-        dataframe: A dataframe corresponding to the function chosen
+        dataframe: A dataframe corresponding to the function chosen.
     """
-    n=0
-    L=[]
+    n = 0
+    L = []
     dct = {database.lower(): globals()[f"form_list_pairs_{database.lower()}"]}
     for path in os.listdir(dir):
         if os.path.isdir(os.path.join(dir, path)):
-            n+=1
-            for i,j in zip (list(dct.keys()), list(dct.values())):
-                if path==i:
+            n += 1
+            for i, j in zip (list(dct.keys()), list(dct.values())):
+                if path == i:
                     L.append((j(os.path.join(dir, path)), path))
-          
-    dg=[]
-    for i in range (len(L)) :
-        dg+=func(L[i][0], L[i][1], tier1, tier2, entity1, entity2)[0]
 
-    dg=list_to_df(dg, func(L[0][0], L[0][1], tier1, tier2, entity1, entity2)[1])
+    dg=[]
+    for i in range (len(L)):
+        dg += func(L[i][0], L[i][1], tier1, tier2, entity1, entity2)[0]
+
+    dg = list_to_df(dg, func(L[0][0], L[0][1], tier1, tier2, entity1, entity2)[1])
     return dg
 
 def get_db_from_func_no_pair(dir, func, database_names, tier):
-    """This function takes a path as an argument and creates a database 
+    """This function takes a path as an argument and creates a dataset 
         based on the number of items in the folder using a chosen function.
-    It doesn't take into account pairs in our databases.
+    It doesn't take into account pairs in our datasets.
 
     Args:
-        dir (str) : path of the folder containing all databases.
+        dir (str) : Path of the folder containing all datasets.
         func (function): Function we want to use.
-        database_names (list): List of database names.
+        database_names (list): List of datasets names.
         tier (str): Tier name.
     Returns:
-        dataframe: A dataframe corresponding to the function chosen
+        dataframe: A dataframe corresponding to the function chosen.
     """
-    n=0
-    L=[]
+    n = 0
+    L = []
     for path in os.listdir(dir):
         if os.path.isdir(os.path.join(dir, path)):
-            n+=1
+            n += 1
             for i in database_names:
-                if path==i.lower():
+                if path == i.lower():
                     L.append((get_all_filepaths((os.path.join(dir, path)), "eaf", None) , path))
 
-    dg=[]
-    for i in range (len(L)) :
-        dg+=func(L[i][0], L[i][1], tier)[0]
+    dg = []
+    for i in range (len(L)):
+        dg += func(L[i][0], L[i][1], tier)[0]
 
     
-    dg=list_to_df(dg, func(L[0][0], L[0][1], tier)[1])
+    dg = list_to_df(dg, func(L[0][0], L[0][1], tier)[1])
     return dg
 
 def get_db_from_func_no_pair_tier(dir, func, database_names, tier1, tier2, entity):
-    """This function takes a path as an argument and creates a database 
+    """This function takes a path as an argument and creates a dataset 
         based on the number of items in the folder using a chosen function.
-    It doesn't take into account pairs in our databases.
+    It doesn't take into account pairs in our datasets.
 
     Args:
-        dir (str) : path of the folder containing all databases.
+        dir (str) : Path of the folder containing all databases.
         func (function): Function we want to use.
         database_names (list): List of database names.
-        tier1 (str): Tier name.
-        tier2 (str): Tier name.
-        entity (str): Entity name.
-
+        tier1 (str): First tier name.
+        tier2 (str): Second tier name.
+        entity (str): Entity name of tier1.
     Returns:
-        dataframe: A dataframe corresponding to the function chosen
+        dataframe: A dataframe corresponding to the function chosen.
     """
-    n=0
-    L=[]
+    n = 0
+    L = []
     for path in os.listdir(dir):
         if os.path.isdir(os.path.join(dir, path)):
-            n+=1
+            n += 1
             for i in database_names:
-                if path==i.lower():
+                if path == i.lower():
                     L.append((get_all_filepaths((os.path.join(dir, path)), "eaf", None) , path))
 
-    dg=[]
-    for i in range (len(L)) :
-        dg+=func(L[i][0], L[i][1], tier1, tier2, entity)[0]
+    dg = []
+    for i in range (len(L)):
+        dg += func(L[i][0], L[i][1], tier1, tier2, entity)[0]
 
     
-    dg=list_to_df(dg, func(L[0][0], L[0][1], tier1, tier2, entity)[1])
+    dg = list_to_df(dg, func(L[0][0], L[0][1], tier1, tier2, entity)[1])
     return dg

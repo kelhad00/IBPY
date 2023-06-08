@@ -14,11 +14,9 @@ def get_all_filepaths(root, ext, to_fill=None):
         ext (str): extension of files to read.
         to_fill ([type], optional): list to add the paths to. Defaults to None.
                                     If none, considered an empty list.
-    
     Returns:
         [type]: [description]
     """
-
     if to_fill is None:
         to_fill = []
     if not isinstance(to_fill, list):
@@ -39,11 +37,9 @@ def read_eaf_to_dict(filepath, mark=True, tiers=None):
         mark (bool, optional):  append same ID to parent/children tiers.
                                 Defaults to True.
         tiers (list): list of tier names to keep and discard the rest.
-    
     Returns:
         [dict]: {tier name: [(begin, end, value)]}
     """
-
     eaf = pympi.Elan.Eaf(filepath)
     dct = {}
     if tiers is None:
@@ -73,8 +69,15 @@ def read_eaf_to_dict(filepath, mark=True, tiers=None):
 
 
 def get_tier_from_file(filepath, tier, values=None):
-    """Return a dict of {tier:[(strt, stp, val),...]} if val in values"""
-
+    """Return a dict of {tier:[(strt, stp, val),...]} if val in values
+    
+    Args:
+        filepath (str): path to eaf file
+        tier (str): tier name
+        values (list, optional): list of values to keep. Defaults to None.
+    Returns:
+        [dict]: {tier: [(strt, stp, val),...]}
+    """
     dct = read_eaf_to_dict(filepath)
     if values is not None:  # if none keep all
         if not isinstance(values, (list, tuple, numpy.ndarray, str)):
@@ -97,10 +100,19 @@ def get_tier_from_file(filepath, tier, values=None):
 
 def replace_label(lst, to_replace, value=None, inplace=False, append=None):
     """Replace to_replace label with value in list lst.
-    
     Note: Elements of lst should be in the (start time, stop time, label) format.
-    """
 
+    Args:
+        lst (list): list of (start time, stop time, label) tuples.
+        to_replace (str): label to replace.
+        value (str, optional): value to replace with. Defaults to None.
+        inplace (bool, optional): if True, replace in place. Defaults to False. 
+        append (str, optional): append to the label. Defaults to None.
+    Raises:
+        AttributeError: both value and append parameters cannot be None.
+    Returns:
+        [list]: list of (start time, stop time, label) tuples.
+    """
     if not (value or append):
         raise AttributeError("both value and append parameters cannot be None.")
     if isinstance(to_replace, str):
@@ -115,6 +127,14 @@ def replace_label(lst, to_replace, value=None, inplace=False, append=None):
     return newlst
 
 def get_time_eaf(folder, tiers=None):
+    """Return a list of max end time of each eaf file in folder.    
+
+    Args:
+        folder (list): list of eaf file paths.
+        tiers (list, optional): list of tiers to consider. Defaults to None.
+    Returns:
+        [list]: list of max end time of each eaf file in folder.
+    """
     lst_time = []
 
     for file in folder:
@@ -134,7 +154,14 @@ def get_time_eaf(folder, tiers=None):
 
 
 def get_tier_count(folder, tier_name):
-    lst_file = []
+    """Return a list of number of annotations in each eaf file in folder.
+
+    Args:
+        folder (list): list of eaf file paths.
+        tier_name (list): list of tiers to consider.
+    Returns:
+        [list]: list of number of annotations in each eaf file in folder.
+    """
     lst = []
 
     for file in folder:
@@ -153,7 +180,14 @@ def get_tier_count(folder, tier_name):
     return lst
 
 def get_max_min_time_tier(folder, tier) :
+    """Return a list of max and min duration of each annotation in each eaf file in folder.
 
+    Args:
+        folder (list): list of eaf file paths.
+        tier (str): tier to consider.
+    Returns:
+        [list]: list of max and min duration of each annotation in each eaf file in folder.
+    """
     lst_max = []
     lst_min = []
 
@@ -192,7 +226,6 @@ def get_tier_intensities(folder, tier, intensities) :
         folder (list): list of file paths.
         tier (string): tier name.
         intensities (list): list of intensities to count.
-
     Returns:
         list: list of dict of {intensity: count} for each file in folder.
     """
@@ -227,7 +260,6 @@ def remove_label(lst, to_remove):
     Returns:
         list: list of the same type as lst.
     """
-
     if isinstance(to_remove, str):
         to_remove = [to_remove]
     newlst = []
@@ -250,7 +282,6 @@ def keep_only(lst, tier_to_keep, inplace=False):
     Returns:
         list: list of filepaths.
     """
-
     if inplace:
         filter_lst = lst
     else:
@@ -270,48 +301,46 @@ def keep_only(lst, tier_to_keep, inplace=False):
 
 #ADDED
 def tuple_access(filepath, expression, where, index):
-    """
-    This function accesses the information of a tuple
+    """This function accesses the information of a tuple.
     
-    Args : 
-        filepath (str) --> path of the file
-        expression (str) --> Smiles_0 ou Laughs_0
-        where (int) --> position of the tuple to which we want to access
-        index (int)--> index of the element to be accessed in the tuple (0, 1 ou 2)
-    Return : The wanted information
+    Args: 
+        filepath (str): path of the file.
+        expression (str): name of the tier.
+        where (int): position of the tuple to which we want to access.
+        index (int): index of the element to be accessed in the tuple (0, 1 ou 2).
+    Returns: The wanted information.
     """
-    
-    to_dict = read_eaf_to_dict (filepath, mark=True, tiers=None)
-    m=to_dict[expression][where-1][index]
+    to_dict = read_eaf_to_dict(filepath, mark=True, tiers=None)
+    m = to_dict[expression][where-1][index]
 
     return m
 
 def find_indice_tuple(lst, value, idx):
-    """
-    Finds the index of a tuple in a list of multiple tuples
+    """Finds the index of a tuple in a list of multiple tuples.
     
-    Args :
-        lst (list) --> the list containing the tuples
-        value (int/str) --> value contained in the tuple
-        idx (int) --> position in the tuple corresponding to "value"
-    Return : 
-        int : the index of the tuple where the value at position idx is.
+    Args:
+        lst (list): the list containing the tuples.
+        value (int/str): value contained in the tuple.
+        idx (int): position in the tuple corresponding to "value".
+    Returns: 
+        int: the index of the tuple where the value at position idx is.
     """
-    indice=0
-    for _ in lst :
-        indice +=1
-        if value == _[idx] :
+    indice = 0
+    for _ in lst:
+        indice += 1
+        if value == _[idx]:
             return (indice)
 
 def get_all_filenames(root, ext, to_fill=None):
     """Return list of eaf files name.
+
     Args:
         root (str): directory path to read from.
         ext (str): extension of files to read.
         to_fill ([type], optional): list to add the names to. Defaults to None.
                                     If none, considered an empty list.
     Returns:
-        [filename1, filname2,....]
+        [filename1, filname2,....].
     """
     if to_fill is None:
         to_fill = []
@@ -328,11 +357,11 @@ def get_all_filenames(root, ext, to_fill=None):
 def replace_intensity(lst):
     """This function replace intensity by numbers.
 
-    Args : lst (list) -> list of tuples (stt, stp, label)
-
-    Return : Return a list with all the labels replaced by numbers
+    Args: 
+        lst (list): list of tuples (stt, stp, label).
+    Returns: 
+        list: list of tuples (stt, stp, label).
     """
-
     labels = set(i[2] for i in lst)
     # num_labels = len(labels)
 
@@ -342,26 +371,23 @@ def replace_intensity(lst):
 
     return [(stt, stp, label_mapping[label]) for stt, stp, label in lst]
 
-def tuple_to_int_sequence(lst,width, shift):
+def tuple_to_int_sequence(lst, width, shift):
     """This function convert tuple (stt, stp, label) into a sequence of int corresponding to the label.
 
     Args:
-        lst (list): list of tuple (stt, stp, label)
-        width (numeric): window width in ms
-        shift (numeric): window shift in ms
-
+        lst (list): list of tuple (stt, stp, label).
+        width (numeric): window width in ms.
+        shift (numeric): window shift in ms.
     Returns:
-        list: A sequence of int
+        list: A sequence of int.
     """
-    if len(lst)==0:
-        lst_int=[]
-    else :
-        L=replace_intensity(lst)
-        #print(L)
-        lst_int=tuple_to_sequence(L,width, shift)
-        #print(lst_int)
-        for i in range(len(lst_int)) :
+    if len(lst) == 0:
+        lst_int = []
+    else:
+        L = replace_intensity(lst)
+        lst_int = tuple_to_sequence(L, width, shift)
+        for i in range(len(lst_int)):
             if lst_int[i] is None:
-                lst_int[i]=0
+                lst_int[i] = 0
     return lst_int
 

@@ -5,12 +5,10 @@ def get_overlapping_segments_ind(lstA, lstB):
     
     Args:
         lstA (list of tuples): [(start time, stop time, lab),..].
-        lstB (list of tuples): [(start time, stop time, lab),..]
-    
+        lstB (list of tuples): [(start time, stop time, lab),..].
     Returns
         dict: {index of segment in lstA: [indices of segments in lstB]}
     """
-
     indA = 0
     indB = 0
     dct = {}
@@ -55,10 +53,9 @@ def gos_ind(A, B): #get_overlapping_segments_ind - correct function
     
     Args:
         lstA (list of tuples): [(start time, stop time, lab),..].
-        lstB (list of tuples): [(start time, stop time, lab),..]
-    
-    Returns
-        dict: {index of segment in lstA: [indices of segments in lstB]}
+        lstB (list of tuples): [(start time, stop time, lab),..].
+    Returns:
+        dict: {index of segment in lstA: [indices of segments in lstB]}.
     """
     indA = 0
     indB = 0
@@ -73,10 +70,10 @@ def gos_ind(A, B): #get_overlapping_segments_ind - correct function
          
         # If segment is valid, we add indices corresponding to A and B to the dictionnary
         if l <= r:
-            if indA in dct :            #if A indice is already in the dict,
+            if indA in dct:            #if A indice is already in the dict,
                 dct[indA].append(indB)      #we add B indice to those who are aloready ther
             else :
-                dct[indA]=[indB]            
+                dct[indA] = [indB]            
  
         #If the endtime of the i-th interval of list A is smaller, we increment indice A.
         #Else, we increment indice B
@@ -92,12 +89,11 @@ def get_overlapping_segments(lstA, lstB, values_only=False):
     """Get segments in lstB overlapping with segments of lstA.
     
     Args:
-        lstA ([type]): [(start, stop, label), etc.]
-        lstB ([type]): [(start, stop, label), etc.]
+        lstA ([type]): [(start, stop, label), etc.].
+        lstB ([type]): [(start, stop, label), etc.].
         values_only (bool, optional): [description]. Defaults to False.
-    
     Returns:
-        dict: {Segments in A: [Segments in B]}
+        dict: {Segments in A: [Segments in B]}.
     """
     dct_inds = gos_ind(lstA, lstB)
     if values_only:
@@ -136,7 +132,6 @@ def count_mimicry(lstA, lstB, delta_t=0):
               where the indB element of B mimick the indA element of A
               following the definition of mimickry described in the reference above.
     """
-
     indA = 0
     indB = 0
     count = 0  # number of mimicry events
@@ -179,14 +174,11 @@ def count_mimicry_per_value_in_tier(ref, target, delta_t):
         target (dict): dictionary of values in tier potentially mimicking.
         delta_t (float): time after which expression occuring still counts as mimicry.
                         Should be in the same unit as the times in ref and target.
-    
     Raises:
-        AttributeError: [description]
-    
+        AttributeError: if there are duplicate values in ref.
     Returns:
-        [type]: [description]
+        dict: {ref_value: {target_value: (count, [(indA, indB),...])}}
     """
-
     final = {}
     if len(set(ref)) != len(ref):
         raise AttributeError("No parameter is allowed in the parameter ref")
@@ -202,18 +194,26 @@ def calculate_mimicking_ratio(total_mimicker_expressions, total_mimicked_express
     the total number of a certain expression.
     
     Args:
-        total_mimicker_expr ([type]): [description]
-        total_mimicked_expressions ([type]): [description]
-    
+        total_mimicker_expression (float): total number of expression that are mimicking.
+        total_mimicked_expressions (float): total number of expression that are mimicked.
     Returns:
-        [type]: [description]
+        float: ratio of the total number of expression that are mimicking to
     """
 
     return total_mimicked_expressions / total_mimicker_expressions
 
 
 def following_expressions(lst, delta_t=0):
-    """succession of expressions in tier"""
+    """succession of expressions in tier
+    
+    Args:
+        lst (list): list of tuples (start, stop, label) of expressions.
+        delta_t (int, optional): Defaults to 0.
+                                Time after which expression occuring still counts as mimicry.
+                                Should be in the same unit as the times in lstA and lstB.
+    Returns:
+        dict: {label: [label, label, ...]}.
+    """
     dct = {}
     for l in range(len(lst) - 1):
         if (lst[l + 1][0] - lst[l][1]) <= delta_t:
@@ -230,6 +230,16 @@ def following_expressions(lst, delta_t=0):
 
 
 def count_vals_in_tier(lst, vals_to_count=None):
+    """Count the number of times each value in vals_to_count appears in lst.
+
+    Args:
+        lst (list): list of tuples (start, stop, label) of expressions.
+        vals_to_count (list, optional): Defaults to None.
+                                        List of values to count.
+                                        If None, all values are counted.
+    Returns:
+        dict: {label: count}.
+    """
     dct = {}
     for lab in lst:
         if lab is not None:
@@ -243,10 +253,28 @@ def count_vals_in_tier(lst, vals_to_count=None):
 
 
 def calculate_correlation(lstA, lstB):
+    """Calculate the correlation between two tiers.
+
+    Args:
+        lstA (list): list of tuples (start, stop, label) of expressions.
+        lstB (list): list of tuples (start, stop, label) of expressions.
+    Returns:
+        float: correlation between the two tiers.
+    """
+
     pass #TODO
 
 
 def count_following(lst, n, max_dist):
+    """Count the number of times each label is followed by each other label in a list.
+
+    Args:
+        lst (list): list of tuples (start, stop, label) of expressions.
+        n (int): number of following expressions to consider.
+        max_dist (int): maximum distance between two expressions to consider them as following.
+    Returns:
+        dict: {label: {n: {label: count}}}.
+    """
     labs = set([l for _, _, l in lst])
     dct = {}
     for l in labs:
@@ -305,7 +333,6 @@ def get_prev_n_exp(lst, n, max_dist, append_none=True):
         max_dist (int): maximum distance between elements, in number of elements.
                         After this distance, labels are not considered preceding the current one,
         append_none (bool, optional): fill with None if no more preceding label. Defaults to True.
-    
     Returns:
         dict: {label: [preceding labels]}
     """
@@ -336,10 +363,10 @@ def get_prev_n_exp(lst, n, max_dist, append_none=True):
 def get_overlapping_seg(A, B): 
     """Get segments in A and B that overlap.
     Same as get_overlapping_segments but here, the function makes directly intersection between the segments.
+    
     Args:
         lstA (list of tuples): [(start time, stop time, lab),..].
         lstB (list of tuples): [(start time, stop time, lab),..]
-    
     Returns
         list: [(startime overlap, endtime overlap, lab)]
     """

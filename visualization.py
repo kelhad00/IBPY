@@ -42,7 +42,9 @@ def plot_overlapping_tiers_same_colors(dct):
     """Same as above but does not require lstA and lstB.
 
     Args:
-        dct (dict): output of get_overlapping_segments
+        dct (dict): output of get_overlapping_segments.
+    Returns:
+        None.
     """
     _, ax = plt.subplots()
     ypos = [1, 0.5]
@@ -55,11 +57,11 @@ def plot_overlapping_tiers_same_colors(dct):
             widthB = segB[ind][1] - segB[ind][0]
             leftB = segB[ind][0]
             ax.barh(
-                y=ypos,
-                width=[widthA, widthB],
-                left=[leftA, leftB],
-                height=0.1,
-                color=col[id_col],
+                y = ypos,
+                width = [widthA, widthB],
+                left = [leftA, leftB],
+                height = 0.1,
+                color = col[id_col],
             )
         id_col *= -1
     first = list(dct.keys())[0]
@@ -76,8 +78,14 @@ def plot_overlapping_tiers_same_colors(dct):
 
 
 def plot_tiers(dct):
-    """visualize segments of tiers in a gant graph.
-    dct is a dict of {tier:[(strt, stp, val)]}"""
+    """Visualize segments of tiers in a gant graph.
+    dct is a dict of {tier:[(strt, stp, val)]}.
+    
+    Args:
+        dct (dict): output of get_overlapping_segments_ind.
+    Returns:    
+        None.
+    """
     _, ax = plt.subplots()
     y = 1
     ticks_pos = []
@@ -87,7 +95,7 @@ def plot_tiers(dct):
             continue
         for (strt, stp, _) in lst:
             width = stp - strt
-            ax.barh(y, width=width, left=strt, height=0.1, color="blue")
+            ax.barh(y, width = width, left=strt, height = 0.1, color = "blue")
         ticks_pos.append(y)
         ticks_names.append(name)
         y += 1
