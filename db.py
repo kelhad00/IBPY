@@ -166,10 +166,24 @@ def form_list_pairs_ndc(ROOT3):
         pair_ndc.append(ROOT3+f"\{_}")
     return pair_ndc
 
-## Place for the user to enter his functions form_list_pairs_foldername
+def form_list_pairs(ROOT, foldername):
+    """Gives filespath of pairs for your dataset.
+    
+    Args:
+        ROOT(str): path of your directory.
+        foldername(str): name of the folder.
 
+    Returns:
+        list: [pair1_A, pair1_B, pair2_A, pair2_B,....]
+    """
+    function_name = f"form_pairs_{foldername}"
+    n = eval(function_name)(get_all_filenames(ROOT, "eaf"))
+    liste = list(sum(n, ())) 
+    pair = []
+    for item in liste:
+        pair.append(ROOT + f"\{item}")
+    return pair
 
-####
 
 def get_db_from_func_pair(dir, func, database, expression_choice, tier_lists):
     """This function takes a path as an argument and creates a dataset 
@@ -187,13 +201,14 @@ def get_db_from_func_pair(dir, func, database, expression_choice, tier_lists):
     """
     n = 0
     L = []
-    dct = {db.lower(): globals()[f"form_list_pairs_{db.lower()}"] for db in database}
+    # dct = {db.lower(): globals()[f"form_list_pairs_{db.lower()}"] for db in database}
+    dct = {db.lower(): globals()["form_list_pairs"] for db in database}
     for path in os.listdir(dir):
         if os.path.isdir(os.path.join(dir, path)):
             n += 1
             for i, j in zip(list(dct.keys()), list(dct.values())):
                 if path == i:
-                    L.append((j(os.path.join(dir, path)), path))
+                    L.append((j(os.path.join(dir, path), i), path))
           
     dg = []
     for i in range (len(L)):
@@ -220,13 +235,14 @@ def get_db_from_func_pair_tier(dir, func, database, tier1, tier2, entity1, entit
     """
     n = 0
     L = []
-    dct = {database.lower(): globals()[f"form_list_pairs_{database.lower()}"]}
+    #dct = {database.lower(): globals()[f"form_list_pairs_{database.lower()}"]}
+    dct = {db.lower(): globals()["form_list_pairs"] for db in database}
     for path in os.listdir(dir):
         if os.path.isdir(os.path.join(dir, path)):
             n += 1
             for i, j in zip (list(dct.keys()), list(dct.values())):
                 if path == i:
-                    L.append((j(os.path.join(dir, path)), path))
+                    L.append((j(os.path.join(dir, path), i), path))
 
     dg=[]
     for i in range (len(L)):
