@@ -140,7 +140,7 @@ def form_list_pairs_ifadv(ROOT2):
     """Gives filespath of pairs for ifadv dataset.
 
     Args:
-        ROOT1 (str): path of ifadv directory.
+        ROOT2 (str): path of ifadv directory.
     Returns:
         list: [pair1_A, pair1_B, pair2_A, pair2_B,....].
     """
@@ -155,7 +155,7 @@ def form_list_pairs_ndc(ROOT3):
     """Gives filespath of pairs for ndc dataset.
     
     Args:
-        ROOT1 (str): path of ndc directory.
+        ROOT3 (str): path of ndc directory.
     Returns:
         list: [pair1_A, pair1_B, pair2_A, pair2_B,....]
     """
