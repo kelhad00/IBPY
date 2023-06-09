@@ -32,10 +32,10 @@ def tuple_to_sequence(lst, width, shift):
                     if (frame_id * shift) >= (last_frame * shift):
                         return seq
             elapsed_time = time.time() - start_time
-            if elapsed_time > 30:  
+            if elapsed_time > 10:  
                 raise TimeoutError("Generating the sequence took too long.")
     except TimeoutError as e:
-        print(f"Timeout Error: {e}")
+        # print(f"Timeout Error: {e}")
         seq = [None] * len(lst)
         pass
     #print("Sequence", seq)
