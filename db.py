@@ -88,10 +88,35 @@ def form_pairs_ifadv(lst):
     new_lst2.sort()
     return list(zip(lst1, new_lst2))
 
-## Place for the user to enter his functions form_pairs_foldername
+## pairs files
+def form_pairs_ab(lst):
+    """Return filename pairs [(), (), ...].
 
+    Args:
+        lst (list): list of filenames without the path.
+    Returns:
+        list: [(), (), ...].
+    """
+    pairs = []
+    for i in range(len(lst)):
+        filename = lst[i]
+        name_parts = filename.split('_')
+        prefix = name_parts[0]
+        number = name_parts[1]
+        for j in range(i+1, len(lst)):
+            filename2 = lst[j]
+            name_parts2 = filename2.split('_')
+            prefix2 = name_parts2[0]
+            number2 = name_parts2[1]
+            
+            if prefix == 'A' and prefix2 == 'B' and number == number2:
+                pair2 = 'A_' + number2  
+                
+                if pair2 == '_'.join(name_parts[:2]) and (filename, filename2) not in pairs:
+                    pairs.append((filename, filename2))
+        pairs = sorted(pairs)
+    return pairs
 
-####
 
 #ADDED
 def form_pairs(ROOT1, ROOT2, ROOT3):
@@ -121,50 +146,6 @@ def form_pairs(ROOT1, ROOT2, ROOT3):
 
     return (pair_ccdb, pair_ifadv, pair_ndc)
 
-# def form_list_pairs_ccdb(ROOT1):
-#     """Gives filespath of pairs for ccdb dataset.
-    
-#     Args:
-#         ROOT1 (str): path of ccdb directory.
-#     Returns:
-#         list: [pair1_A, pair1_B, pair2_A, pair2_B,....].
-#     """
-#     c = form_pairs_ccdb(get_all_filenames(ROOT1, "eaf"))
-#     liste_ccdb = list(sum(c, ())) 
-#     pair_ccdb = []
-#     for _ in liste_ccdb:
-#         pair_ccdb.append(ROOT1+f"\{_}")
-#     return pair_ccdb
-
-# def form_list_pairs_ifadv(ROOT2):
-#     """Gives filespath of pairs for ifadv dataset.
-
-#     Args:
-#         ROOT2 (str): path of ifadv directory.
-#     Returns:
-#         list: [pair1_A, pair1_B, pair2_A, pair2_B,....].
-#     """
-#     i = form_pairs_ifadv(get_all_filenames(ROOT2, "eaf"))
-#     liste_ifadv = list(sum(i, ())) 
-#     pair_ifadv = []
-#     for _ in liste_ifadv:
-#         pair_ifadv.append(ROOT2+f"\{_}")
-#     return pair_ifadv
-
-# def form_list_pairs_ndc(ROOT3):
-#     """Gives filespath of pairs for ndc dataset.
-    
-#     Args:
-#         ROOT3 (str): path of ndc directory.
-#     Returns:
-#         list: [pair1_A, pair1_B, pair2_A, pair2_B,....]
-#     """
-#     n = form_pairs_ndc(get_all_filenames(ROOT3, "eaf"))
-#     liste_ndc = list(sum(n, ())) 
-#     pair_ndc = []
-#     for _ in liste_ndc:
-#         pair_ndc.append(ROOT3+f"\{_}")
-#     return pair_ndc
 
 def form_list_pairs(ROOT, foldername):
     """Gives filespath of pairs for your dataset.
