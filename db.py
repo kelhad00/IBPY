@@ -236,7 +236,7 @@ def get_db_from_func_pair_tier(dir, func, database, tier1, tier2, entity1, entit
     n = 0
     L = []
     #dct = {database.lower(): globals()[f"form_list_pairs_{database.lower()}"]}
-    dct = {db.lower(): globals()["form_list_pairs"] for db in database}
+    dct = {database.lower(): globals()["form_list_pairs"] for _ in database}
     for path in os.listdir(dir):
         if os.path.isdir(os.path.join(dir, path)):
             n += 1
