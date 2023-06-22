@@ -278,9 +278,8 @@ def get_max_min_time_tier(folder, tier) :
     return lst_min, lst_max
 
 
-def get_tier_intensities(folder, tier, intensities) :
+def get_tier_intensities(folder, tier, intensities, kind=None) :
     """Return a list of dict of {intensity: count} for each file in folder.""
-
     Args:
         folder (list): list of file paths.
         tier (string): tier name.
@@ -289,16 +288,20 @@ def get_tier_intensities(folder, tier, intensities) :
         list: list of dict of {intensity: count} for each file in folder.
     """
     lst = []
-
     for file in folder:
         dct = read_eaf_to_dict(file)
+        if kind == "Replace_Value" :
+            for i, item in enumerate(dct[tier]):
+                if item[2] != "":
+                    dct[tier][i] = (item[0], item[1], intensities[0])
+                else:
+                    dct[tier][i] = (item[0], item[1], intensities[1])
         if tier not in dct:
             lst.append(dict.fromkeys(intensities, 0))
             continue
         
         annotations = dct[tier]
         intensity_count = dict.fromkeys(intensities, 0)
-
         for annotation in annotations:
             intensity = annotation[2].strip()
             
