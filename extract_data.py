@@ -1,3 +1,4 @@
+import json
 import os
 import pympi
 import numpy
@@ -68,34 +69,92 @@ def read_eaf_to_dict(filepath, mark=True, tiers=None):
     return dct
 
 
-def get_tier_from_file(filepath, tier, values=None):
-    """Return a dict of {tier:[(strt, stp, val),...]} if val in values
+# def get_tier_from_file(filepath, tier, values=None):
+#     """Return a dict of {tier:[(strt, stp, val),...]} if val in values
     
+#     Args:
+#         filepath (str): path to eaf file
+#         tier (str): tier name
+#         values (list, optional): list of values to keep. Defaults to None.
+#     Returns:
+#         [dict]: {tier: [(strt, stp, val),...]}
+#     """
+#     dct = read_eaf_to_dict(filepath)
+#     if values is not None:  # if none keep all
+#         if not isinstance(values, (list, tuple, numpy.ndarray, str)):
+#             raise AttributeError("Values must be a list-like object or a string")
+#         if isinstance(values, str):
+#             values = [values]
+    
+#     if tier not in dct:
+#         return {tier: []}
+    
+#     filtered_data = []
+#     if values is None:
+#         values = set([lab for _, _, lab in dct[tier]])
+#     for annot in dct[tier]:
+#         if annot[2] in values:
+#             filtered_data.append(annot)
+
+#     return {tier: filtered_data}
+
+def get_tier_from_file(filepath, tier, values=None, filename=None):
+    """Return a dict of {tier:[(strt, stp, val),...]} if val in values
     Args:
         filepath (str): path to eaf file
         tier (str): tier name
         values (list, optional): list of values to keep. Defaults to None.
+        filename (str): name of the json file
     Returns:
         [dict]: {tier: [(strt, stp, val),...]}
     """
-    dct = read_eaf_to_dict(filepath)
-    if values is not None:  # if none keep all
-        if not isinstance(values, (list, tuple, numpy.ndarray, str)):
-            raise AttributeError("Values must be a list-like object or a string")
-        if isinstance(values, str):
-            values = [values]
-    
-    if tier not in dct:
-        return {tier: []}
-    
-    filtered_data = []
-    if values is None:
-        values = set([lab for _, _, lab in dct[tier]])
-    for annot in dct[tier]:
-        if annot[2] in values:
-            filtered_data.append(annot)
-
-    return {tier: filtered_data}
+    """
+    This function is used to get the tier from the eaf file and replace 
+    the value of the tier with the value in the json file;
+    It has been modified to include the filename parameter which is the name 
+    of the json file as part of the CBA-toolkit development: https://github.com/kelhad00/CBA-toolkit.git 
+    """
+    try :
+        with open(f'{filename}.json') as json_file:
+                data = json.load(json_file)
+        replace_value = data['TIER_LISTS'][tier]['Replace_Value']
+        dct = read_eaf_to_dict(filepath)
+        if values is not None:  # if none keep all
+            if not isinstance(values, (list, tuple, numpy.ndarray, str)):
+                raise AttributeError("Values must be a list-like object or a string")
+            if isinstance(values, str):
+                values = [values]
+        if tier not in dct:
+            return {tier: []}
+        filtered_data = []
+        if replace_value != "" :
+            for i, item in enumerate(dct[tier]):
+                if item[2] != "":
+                    dct[tier][i] = (item[0], item[1], replace_value)
+                else:
+                    dct[tier][i] = (item[0], item[1], "No_" + replace_value)
+        if values is None:
+            values = set([lab for _, _, lab in dct[tier]])
+        for annot in dct[tier]:
+            if annot[2] in values:
+                filtered_data.append(annot)
+        return {tier: filtered_data}
+    except :
+        dct = read_eaf_to_dict(filepath)
+        if values is not None:  # if none keep all
+            if not isinstance(values, (list, tuple, numpy.ndarray, str)):
+                raise AttributeError("Values must be a list-like object or a string")
+            if isinstance(values, str):
+                values = [values]
+        if tier not in dct:
+            return {tier: []}
+        filtered_data = []
+        if values is None:
+            values = set([lab for _, _, lab in dct[tier]])
+        for annot in dct[tier]:
+            if annot[2] in values:
+                filtered_data.append(annot)
+        return {tier: filtered_data}
 
 
 def replace_label(lst, to_replace, value=None, inplace=False, append=None):
